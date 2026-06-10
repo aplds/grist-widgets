@@ -12,6 +12,23 @@
             padding: 20px;
             font-family: Arial, sans-serif;
         }
+        /* Style pour les boutons (optionnel, peut être déplacé dans le JS) */
+        .menu-button {
+            margin: 0 8px 8px 0;
+            padding: 12px 24px;
+            background-color: #000091;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-family: Marianne, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .menu-button:hover {
+            background-color: #1e1e5e;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +57,6 @@
                 alt="Logo Institut Agro"
                 style="height: 90px; width: auto;"
             />
-
             <!-- Titre -->
             <div
                 id="menuTitle"
@@ -55,7 +71,6 @@
                 "
             ></div>
         </div>
-
         <!-- Conteneur des boutons -->
         <div
             id="menuContainer"
@@ -70,12 +85,12 @@
         ></div>
     </div>
 
-    <!-- Dépendances nécessaires pour GRIST -->
+    <!-- Dépendances nécessaires pour GRIST (optionnelles pour GitHub Pages) -->
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/dompurify@3/dist/purify.min.js"></script>
 
-    <!-- Script personnalisé -->
+    <!-- Script personnalisé (assurez-vous que le chemin est correct) -->
     <script src="script.js"></script>
 </body>
 </html>
