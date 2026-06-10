@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>Visualiseur Markdown avec impression</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.3/dist/purify.min.js"></script>
+    <script src="index.js"></script>
+    <style>
+      :root {
+        --border-radius: 4px;
+        --medium-font-size: 13px;
+        --primary-bg: #FFFFFF;
+        --primary-fg-hover: #009058;
+        --primary-fg: #16B378;
+        --secondary-fg: #16B378;
+        --secondary-fg-hover: #009058;
+      }
+      html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        font-family: sans-serif;
+        line-height: 1.4;
+      }
+      .editor-preview {
+        padding: 16px;
+        overflow-y: auto;
+        height: 100%;
+        box-sizing: border-box;
+        position: relative;
+      }
+      code {
+        background-color: #dfe9ff;
+        padding: 0 4px;
+        border-radius: 4px;
+        color: black;
+      }
+      blockquote {
+        border-left: 4px solid #ddd;
+        margin: 0;
+        padding: 0 1rem;
+        color: #666;
+      }
+      .editor-preview pre {
+        background-color: #eef3ff;
+        padding: 8px;
+        border-radius: 4px;
+      }
+      .editor-preview pre code {
+        background-color: unset;
+        padding: unset;
+        border-radius: unset;
+      }
+      hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+      }
+      .editor-preview table {
+        margin: 2rem 0;
+        border-spacing: 0;
+        border: 1px solid lightgrey;
+        border-left: none;
+        border-top: none;
+      }
+      .editor-preview table th, .editor-preview table td {
+        border: 1px solid lightgrey;
+        padding: 0.5rem 1rem;
+        border-right: none;
+        border-bottom: none;
+      }
+      .editor-preview table th:empty, .editor-preview table td:empty {
+        height: 0px;
+        padding: 0px;
+        border-top: none;
+      }
+      #error {
+        display: none;
+        background: red;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      /* Bouton d'impression flottant */
+      .print-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        padding: 8px 12px;
+        background-color: var(--primary-fg);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: var(--medium-font-size);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .print-button:hover {
+        background-color: var(--primary-fg-hover);
+      }
+      .print-button i {
+        font-style: normal;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="error"></div>
+    <div class="editor-preview">
+      <button id="printBtn" class="print-button">
+        <i>🖨️</i> Imprimer
+      </button>
+      <div id="preview"></div>
+    </div>
+  </body>
+</html>
