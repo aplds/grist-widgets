@@ -1,210 +1,73 @@
-var tableId = null;
-var rowId = null;
-var colId = null;
-var cachedData = null;
-var previewElement = null;
-var printBtn = null;
+// Configuration des colonnes attendues par le widget
+const WIDGET_CONFIG = {
+    columns: [
+        { name: "Menu", type: "Text", required: true, label: "Titre du menu" },
+        { name: "Lien", type: "TextList", required: true, label: "Liste des liens" },
+        { name: "Titre", type: "TextList", required: true, label: "Liste des titres des boutons" }
+    ],
+    requiredAccess: 'read table'
+};
 
-// Fonction pour afficher les erreurs
-function showError(msg) {
-    var el = document.getElementById('error');
-    if (!msg) {
-        el.style.display = 'none';
-    } else {
-        el.innerHTML = msg;
-        el.style.display = 'block';
-    }
-}
-
-// Fonction pour rendre le Markdown
-function renderMarkdown(content) {
-    if (!previewElement) {
-        previewElement = document.getElementById('preview');
-    }
-    var html = marked.parse(content || '');
-    var cleanHtml = DOMPurify.sanitize(html, { FORCE_BODY: true });
-    previewElement.innerHTML = cleanHtml;
-}
-
-// Fonction pour attendre que les images soient chargées
-function waitForImages(element) {
-    const images = element.querySelectorAll('img');
-    if (images.length === 0) {
-        return Promise.resolve();
+// Fonction pour mettre à jour le widget
+function updateWidget(record) {
+    // Remplir le titre
+    const menuTitle = document.getElementById("menuTitle");
+    if (menuTitle && record && record.Menu) {
+        menuTitle.textContent = record.Menu;
     }
 
-    return Promise.all(
-        Array.from(images).map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise((resolve) => {
-                img.onload = resolve;
-                img.onerror = resolve; // Résoudre même en cas d'erreur
-            });
-        })
-    );
-}
+    // Effacer et remplir les boutons
+    const menuContainer = document.getElementById("menuContainer");
+    if (menuContainer) {
+        menuContainer.innerHTML = '';
 
-// Fonction pour imprimer via le dialogue natif du navigateur
-async function printContent() {
-    if (!previewElement) {
-        previewElement = document.getElementById('preview');
-    }
+        if (record && record.Lien && record.Titre) {
+            const liens = Array.isArray(record.Lien) ? record.Lien : [record.Lien];
+            const titres = Array.isArray(record.Titre) ? record.Titre : [record.Titre];
 
-    // Masquer temporairement le bouton d'impression
-    const printButton = document.getElementById('printBtn');
-    printButton.style.display = 'none';
+            for (let i = 0; i < Math.max(liens.length, titres.length); i++) {
+                const lien = liens[i] ? liens[i] + (liens[i].includes("?") ? "&style=singlePage" : "?style=singlePage") : "#";
+                const titre = titres[i] || "Lien sans titre";
 
-    try {
-        // Attendre que les images soient chargées
-        await waitForImages(previewElement);
+                const button = document.createElement("button");
+                button.textContent = titre;
+                button.className = "menu-button";
 
-        // Créer une nouvelle fenêtre avec le contenu à imprimer
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            showError("Le navigateur a bloqué l'ouverture de la fenêtre d'impression. Veuillez autoriser les pop-ups pour ce site.");
-            return;
-        }
+                button.onclick = function() {
+                    window.open(lien, "_blank");
+                };
 
-        // Créer un document HTML complet pour l'impression
-        const printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <meta charset="UTF-8">
-        <title>Impression - Ligne ${rowId}</title>
-        <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.4;
-            color: #333;
-            margin: 0;
-            padding: 20mm; /* Marges pour l'impression */
-        }
-        img {
-            max-width: 100% !important;
-            height: auto !important;
-        }
-        code {
-            background-color: #dfe9ff;
-            padding: 0 4px;
-            border-radius: 4px;
-            color: black;
-        }
-        blockquote {
-            border-left: 4px solid #ddd;
-            margin: 0;
-            padding: 0 1rem;
-            color: #666;
-        }
-        pre {
-            background-color: #eef3ff;
-            padding: 8px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-        table {
-            margin: 2rem 0;
-            border-spacing: 0;
-            border: 1px solid lightgrey;
-            border-left: none;
-            border-top: none;
-            width: 100%;
-        }
-        table th, table td {
-            border: 1px solid lightgrey;
-            padding: 0.5rem 1rem;
-            border-right: none;
-            border-bottom: none;
-        }
-        @media print {
-            body {
-                padding: 10mm; /* Marges réduites pour l'impression */
+                menuContainer.appendChild(button);
             }
         }
-        </style>
-        </head>
-        <body>
-        ${previewElement.innerHTML}
-        <script>
-        window.onload = function() {
-            window.print();
-            // Fermer la fenêtre après l'impression (optionnel)
-            // window.onafterprint = function() { window.close(); };
+    }
+}
+
+// Vérifie si l'API GRIST est disponible
+if (typeof grist !== 'undefined') {
+    // Mode GRIST : utilise l'API avec la configuration des colonnes
+    grist.ready(WIDGET_CONFIG);
+
+    grist.onRecord(function(record) {
+        updateWidget(record);
+    });
+} else {
+    // Mode GitHub Pages : utilise des données simulées
+    document.addEventListener('DOMContentLoaded', function() {
+        // Données simulées (à adapter selon vos besoins)
+        const simulatedRecord = {
+            Menu: "Menu Principal",
+            Lien: [
+                "https://www.example.com/accueil",
+                "https://www.example.com/contact",
+                "https://www.example.com/a-propos"
+            ],
+            Titre: [
+                "Accueil",
+                "Contact",
+                "À propos"
+            ]
         };
-        <\/script>
-        </body>
-        </html>
-        `;
-
-        // Écrire le contenu dans la nouvelle fenêtre
-        printWindow.document.open();
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-
-    } catch (error) {
-        console.error("Erreur lors de l'impression :", error);
-        showError("Une erreur est survenue lors de l'impression. Veuillez réessayer.");
-    } finally {
-        // Réafficher le bouton d'impression
-        printButton.style.display = 'flex';
-    }
+        updateWidget(simulatedRecord);
+    });
 }
-
-// Initialisation du widget
-function ready(fn) {
-    if (document.readyState !== 'loading') {
-        fn();
-    } else {
-        document.addEventListener('DOMContentLoaded', fn);
-    }
-}
-
-ready(() => {
-    previewElement = document.getElementById('preview');
-    printBtn = document.getElementById('printBtn');
-
-    printBtn.addEventListener('click', printContent);
-
-    grist.ready({
-        columns: [{ name: "Content", type: 'Text' }],
-        requiredAccess: 'read table'
-    });
-
-    grist.on('message', (e) => {
-        if (e.tableId) {
-            tableId = e.tableId;
-        }
-    });
-
-    grist.onRecord(function(record, mappings) {
-        var keys = Object.keys(record);
-        rowId = record.id;
-        delete record.id;
-
-        if (!mappings) {
-            if (keys.length !== 1) {
-                showError("Veuillez sélectionner une colonne pour afficher le contenu.");
-                return;
-            }
-            colId = keys[0];
-        } else if (mappings) {
-            if (!mappings.Content) {
-                showError("Veuillez sélectionner une colonne pour afficher le contenu.");
-                return;
-            }
-            colId = mappings.Content;
-        }
-
-        showError(null);
-        var data = record[colId] || '';
-        if (data !== cachedData) {
-            renderMarkdown(data);
-            cachedData = data;
-        }
-    });
-
-    grist.onNewRecord(() => {
-        previewElement.innerHTML = '';
-        cachedData = null;
-    });
-});
