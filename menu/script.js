@@ -1,10 +1,37 @@
-grist.ready({
-    requiredAccess: 'read table'
-});
+// Vérifie si l'API GRIST est disponible (pour un usage dans GRIST)
+if (typeof grist !== 'undefined') {
+    // Mode GRIST : utilise l'API normale
+    grist.ready({
+        requiredAccess: 'read table'
+    });
 
-// Utilisez onRecord au lieu de onRecords pour cibler uniquement la ligne active
-grist.onRecord(function(record) {
-    // Remplir le titre avec la valeur de la colonne Menu de la ligne active
+    grist.onRecord(function(record) {
+        updateWidget(record);
+    });
+} else {
+    // Mode GitHub Pages : utilise des données simulées
+    document.addEventListener('DOMContentLoaded', function() {
+        // Données simulées pour GitHub Pages
+        const simulatedRecord = {
+            Menu: "Exemple de Menu",
+            Lien: [
+                "https://www.example.com/lien1",
+                "https://www.example.com/lien2",
+                "https://www.example.com/lien3"
+            ],
+            Titre: [
+                "Bouton 1",
+                "Bouton 2",
+                "Bouton 3"
+            ]
+        };
+        updateWidget(simulatedRecord);
+    });
+}
+
+// Fonction commune pour mettre à jour le widget
+function updateWidget(record) {
+    // Remplir le titre
     const menuTitle = document.getElementById("menuTitle");
     if (record && record.Menu) {
         menuTitle.textContent = record.Menu;
@@ -53,4 +80,4 @@ grist.onRecord(function(record) {
             menuContainer.appendChild(button);
         }
     }
-});
+}
