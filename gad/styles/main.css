@@ -1,44 +1,26 @@
-/* Styles complémentaires au DSFR pour pleine largeur et qualité des images */
+/* Styles complémentaires pour le widget Grist */
 
-/* Pleine largeur pour tous les conteneurs */
+/* Pleine largeur */
 .fr-container {
     width: 100%;
     max-width: none;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    margin-left: auto;
-    margin-right: auto;
+    padding: 0 1.5rem;
 }
 
 /* Correction des logos */
-.fr-header__logo {
-    display: flex;
-    align-items: center;
-}
-
-.fr-header__logo p.fr-logo {
-    margin: 0;
-    font-size: 1.2rem;
-    line-height: 1.2;
-}
-
-.custom-institut-logo {
+.fr-header__operator img {
     height: 4rem;
     width: auto;
     object-fit: contain;
 }
 
-/* Tableaux en pleine largeur */
+/* Tableaux */
 .fr-table {
     width: 100%;
     margin: 1.5rem 0;
 }
 
-.fr-table table {
-    width: 100%;
-}
-
-/* Badges DSFR */
+/* Badges */
 .fr-badge {
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
@@ -46,25 +28,20 @@
 }
 
 /* Espacement */
-.fr-py-6w {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+.fr-py-4w {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
-/* Modales en pleine largeur */
-.fr-modal {
-    width: 100%;
-}
-
-.fr-modal .fr-container {
-    max-width: 1200px;
+/* Conteneur des affaires */
+#affaires-container {
+    min-height: 300px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .fr-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding: 0 1rem;
     }
 
     .fr-header__operator img {
