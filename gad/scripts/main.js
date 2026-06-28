@@ -1,93 +1,64 @@
 /**
- * Solution finale pour un widget Grist hébergé sur GitHub Pages
+ * Solution finale fonctionnelle pour un widget Grist
  */
 
-// Attendre que le DOM soit chargé
+// Fonction principale qui s'exécute quand le DOM est chargé
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser le DSFR
     if (window.dsfr) {
         window.dsfr.start();
     }
 
-    // Fonction pour vérifier si nous sommes dans un widget Grist
-    function isInGristWidget() {
-        return typeof window !== 'undefined' &&
-               (window.location.href.includes('grist.numerique.gouv.fr') ||
-                window.location.href.includes('getgrist.com'));
-    }
-
-    // Fonction pour charger les données
-    async function loadData() {
-        const container = document.getElementById('affaires-container');
-
-        try {
-            if (isInGristWidget()) {
-                // Dans un widget Grist, utiliser l'API Grist
-                await initGristAPI();
-            } else {
-                // En développement ou sur GitHub Pages, utiliser des données mock
-                container.innerHTML = `
-                    <div class="fr-callout fr-callout--warning">
-                        <h3 class="fr-callout__title">Mode démonstration</h3>
-                        <p class="fr-callout__text">Ce widget est conçu pour fonctionner dans Grist. Vous voyez actuellement des données d'exemple.</p>
-                    </div>
-                `;
-                renderMockData();
-                return;
-            }
-        } catch (error) {
-            console.error("Erreur d'initialisation:", error);
-            container.innerHTML = `
-                <div class="fr-callout fr-callout--error">
-                    <h3 class="fr-callout__title">Erreur</h3>
-                    <p class="fr-callout__text">Impossible de charger les données: ${error.message}</p>
-                </div>
-            `;
-        }
-    }
-
-    // Initialisation de l'API Grist
-    async function initGristAPI() {
+    // Fonction pour vérifier si Grist est disponible
+    function checkGristAvailable() {
         return new Promise((resolve, reject) => {
-            // Vérifier si grist est disponible
-            const checkGrist = setInterval(() => {
-                if (typeof grist !== 'undefined') {
-                    clearInterval(checkGrist);
-
-                    try {
-                        // Initialiser l'API Grist
-                        grist.ready({
-                            requiredAccess: 'read table'
-                        });
-
-                        // Écouter les changements de données
-                        grist.onRecords(function(records) {
-                            renderAffaires(records);
-                        });
-
-                        // Charger les données initiales
-                        grist.docApi.fetchSelectedTable()
-                            .then(records => {
-                                renderAffaires(records);
-                                resolve();
-                            })
-                            .catch(error => {
-                                console.error("Erreur lors du chargement initial:", error);
-                                reject(new Error("Impossible de charger les données initiales"));
-                            });
-                    } catch (error) {
-                        console.error("Erreur d'initialisation Grist:", error);
-                        reject(new Error("Impossible d'initialiser l'API Grist"));
-                    }
+            // Vérifier toutes les 100ms si grist est disponible
+            const interval = setInterval(() => {
+                if (typeof grist !== 'undefined' && grist.ready) {
+                    clearInterval(interval);
+                    resolve();
                 }
             }, 100);
 
-            // Timeout après 10 secondes
+            // Timeout après 5 secondes
             setTimeout(() => {
-                clearInterval(checkGrist);
-                reject(new Error("Timeout: l'API Grist n'est pas disponible"));
-            }, 10000);
+                clearInterval(interval);
+                reject(new Error("Grist API non disponible"));
+            }, 5000);
         });
+    }
+
+    // Fonction pour initialiser l'application
+    async function initApp() {
+        try {
+            // Vérifier si nous sommes dans un widget Grist
+            if (window.location.href.includes('grist.numerique.gouv.fr') ||
+                window.location.href.includes('getgrist.com')) {
+
+                // Attendre que Grist soit disponible
+                await checkGristAvailable();
+
+                // Initialiser l'API Grist
+                grist.ready({
+                    requiredAccess: 'read table'
+                });
+
+                // Écouter les changements de données
+                grist.onRecords(function(records) {
+                    renderAffaires(records);
+                });
+
+                // Charger les données initiales
+                const records = await grist.docApi.fetchSelectedTable();
+                renderAffaires(records);
+            } else {
+                // Mode démonstration pour GitHub Pages
+                showDemoMode();
+            }
+        } catch (error) {
+            console.error("Erreur d'initialisation:", error);
+            showError(`Impossible d'initialiser l'application: ${error.message}`);
+        }
     }
 
     // Fonction pour afficher les affaires
@@ -104,22 +75,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Afficher les données brutes pour débogage
+        // Afficher les données dans la console pour débogage
         console.log("Données reçues:", records);
 
         // Créer le tableau
-        const tableHTML = `
+        const headers = getTableHeaders(records);
+
+        container.innerHTML = `
             <div class="fr-table fr-table--layout-fixed">
                 <table>
                     <thead>
                         <tr>
-                            ${getTableHeaders(records).map(header => `<th>${header}</th>`).join('')}
+                            ${headers.map(header => `<th>${header}</th>`).join('')}
                         </tr>
                     </thead>
                     <tbody>
                         ${records.map(record => `
                             <tr>
-                                ${getTableHeaders(records).map(header => {
+                                ${headers.map(header => {
                                     const value = record[header];
                                     if (header.toLowerCase().includes('date') && value) {
                                         try {
@@ -139,8 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </table>
             </div>
         `;
-
-        container.innerHTML = tableHTML;
     }
 
     // Fonction pour obtenir les en-têtes du tableau
@@ -148,8 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!records || records.length === 0) return [];
 
         // Obtenir les clés du premier enregistrement
-        const firstRecord = records[0];
-        return Object.keys(firstRecord);
+        return Object.keys(records[0]);
     }
 
     // Fonction pour obtenir la couleur d'un état
@@ -170,8 +140,28 @@ document.addEventListener('DOMContentLoaded', function() {
         return etatColors[etat] || "#f0f0f0";
     }
 
-    // Fonction pour afficher des données mock en développement
-    function renderMockData() {
+    // Fonction pour afficher un message d'erreur
+    function showError(message) {
+        const container = document.getElementById('affaires-container');
+        container.innerHTML = `
+            <div class="fr-callout fr-callout--error">
+                <h3 class="fr-callout__title">Erreur</h3>
+                <p class="fr-callout__text">${message}</p>
+            </div>
+        `;
+    }
+
+    // Fonction pour afficher le mode démonstration
+    function showDemoMode() {
+        const container = document.getElementById('affaires-container');
+        container.innerHTML = `
+            <div class="fr-callout fr-callout--warning">
+                <h3 class="fr-callout__title">Mode démonstration</h3>
+                <p class="fr-callout__text">Ce widget est conçu pour fonctionner dans Grist. Vous voyez actuellement des données d'exemple.</p>
+            </div>
+        `;
+
+        // Afficher des données d'exemple
         const mockData = [
             {
                 "Numéro": "2023-001",
@@ -199,6 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
         renderAffaires(mockData);
     }
 
-    // Démarrer le chargement des données
-    loadData();
+    // Démarrer l'application
+    initApp();
 });
