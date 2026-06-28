@@ -1,0 +1,38 @@
+/* Styles globaux */
+body {
+    font-family: "Marianne", arial, sans-serif;
+    background-color: #f6f6f6;
+}
+
+/* Tableaux */
+.fr-table {
+    margin-top: 1rem;
+    background-color: white;
+}
+
+/* Badges */
+.fr-badge {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Boutons */
+.fr-btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Onglets */
+.fr-tabs__panel {
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+/* Formulaires */
+.fr-input-group {
+    margin-bottom: 1rem;
+}
