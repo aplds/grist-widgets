@@ -3,61 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Affaires Disciplinaires</title>
-    <!-- Polices Marianne -->
-    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
-    <!-- DSFR CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/utility/utility.min.css">
-    <!-- Nos styles -->
+    <title>Gestion des affaires disciplinaires</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/affaires.css">
+    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header role="banner" class="fr-header">
-        <div class="fr-header__body">
-            <div class="fr-container">
-                <div class="fr-header__body-row">
-                    <div class="fr-header__brand fr-enlarge-link">
-                        <div class="fr-header__logo">
-                            <p class="fr-logo">République<br>française</p>
-                        </div>
-                        <div class="fr-header__operator">
-                            <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
-                                 alt="Institut Agro"
-                                 class="fr-responsive-img custom-institut-logo">
-                        </div>
-                    </div>
-                    <div class="fr-header__service">
-                        <p class="fr-header__service-title">Gestion des affaires disciplinaires</p>
+    <header class="fr-header">
+        <div class="fr-container">
+            <div class="fr-header__body">
+                <div class="fr-header__logo">
+                    <p class="fr-logo">
+                        République
+                        <br>Française
+                    </p>
+                </div>
+                <div class="fr-header__tools">
+                    <div class="fr-header__tools-links">
+                        <ul class="fr-links-group">
+                            <li>
+                                <a class="fr-link" href="membres.html">Gestion des membres</a>
+                            </li>
+                            <li>
+                                <a class="fr-link" href="audiences.html">Gestion des audiences</a>
+                            </li>
+                            <li>
+                                <a class="fr-link" href="modeles.html">Modèles de documents</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="fr-container fr-py-4w">
-        <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
-        <div id="affaires-container" class="fr-callout fr-callout--info">
-            Chargement en cours...
+    <main class="fr-container">
+        <h1>Liste des affaires disciplinaires</h1>
+        <div class="fr-search-bar">
+            <input type="text" id="search-input" placeholder="Rechercher une affaire...">
+            <button class="fr-btn" id="search-button">Rechercher</button>
+        </div>
+        <div class="fr-table">
+            <table id="affaires-table">
+                <thead>
+                    <tr>
+                        <th>Mis en cause</th>
+                        <th>École</th>
+                        <th>État</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="affaires-list">
+                    <!-- Les affaires seront chargées dynamiquement ici -->
+                </tbody>
+            </table>
         </div>
     </main>
 
-    <footer class="fr-footer">
-        <div class="fr-container">
-            <div class="fr-footer__body">
-                <div class="fr-footer__brand fr-enlarge-link">
-                    <p class="fr-logo">République<br>française</p>
-                </div>
-                <div class="fr-footer__content">
-                    <p class="fr-footer__content-desc">Institut Agro</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts DSFR -->
-    <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Notre script -->
-    <script src="scripts/main.js"></script>
+    <script src="scripts/grist-api.js"></script>
+    <script src="scripts/affaires.js"></script>
 </body>
 </html>
