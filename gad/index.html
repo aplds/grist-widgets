@@ -48,9 +48,70 @@
         <div class="fr-grid-row fr-grid-row--gutters">
             <div class="fr-col-12">
                 <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
-                <div id="affaires-container">
-                    <div class="fr-callout fr-callout--info">
-                        Chargement en cours...
+
+                <!-- Filtres -->
+                <div class="fr-grid-row fr-grid-row--gutters fr-mb-3w">
+                    <div class="fr-col-md-4 fr-col-12">
+                        <div class="fr-input-group">
+                            <label class="fr-label" for="searchInput">Rechercher</label>
+                            <input class="fr-input" id="searchInput" type="text" placeholder="Numéro ou mis en cause">
+                        </div>
+                    </div>
+                    <div class="fr-col-md-3 fr-col-12">
+                        <div class="fr-select-group">
+                            <label class="fr-label" for="filterEtat">État</label>
+                            <select class="fr-select" id="filterEtat">
+                                <option value="">Tous les états</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fr-col-md-3 fr-col-12">
+                        <div class="fr-select-group">
+                            <label class="fr-label" for="filterEcole">École</label>
+                            <select class="fr-select" id="filterEcole">
+                                <option value="">Toutes les écoles</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fr-col-md-2 fr-col-12">
+                        <div class="fr-select-group">
+                            <label class="fr-label" for="itemsPerPage">Affaires par page</label>
+                            <select class="fr-select" id="itemsPerPage">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tableau des affaires -->
+                <div class="fr-table fr-table--layout-fixed">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Numéro <span class="sort-icon" data-column="Numero">↕</span></th>
+                                <th>État <span class="sort-icon" data-column="Etat">↕</span></th>
+                                <th>Date <span class="sort-icon" data-column="Date">↕</span></th>
+                                <th>École <span class="sort-icon" data-column="Ecole">↕</span></th>
+                                <th>Mis en cause <span class="sort-icon" data-column="Mis en cause">↕</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="affairesTableBody">
+                            <!-- Le contenu sera généré par JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="fr-grid-row fr-grid-row--gutters fr-mt-3w">
+                    <div class="fr-col-6">
+                        <span id="paginationInfo">Page 1 sur 1 | 0 affaire(s)</span>
+                    </div>
+                    <div class="fr-col-6" style="text-align: right;">
+                        <button class="fr-btn fr-btn--secondary" id="prevPage" disabled>Précédent</button>
+                        <button class="fr-btn fr-btn--secondary" id="nextPage" disabled>Suivant</button>
                     </div>
                 </div>
             </div>
@@ -79,8 +140,8 @@
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
     <!-- Nos scripts -->
-    <script src="scripts/grist-api.js"></script>
-    <script src="scripts/main.js"></script>
+    <script src="scripts/grist-init.js"></script>
     <script src="scripts/affaires.js"></script>
+    <script src="scripts/main.js"></script>
 </body>
 </html>
