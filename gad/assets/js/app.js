@@ -2,7 +2,7 @@
 let currentPage = 1;
 let itemsPerPage = 10;
 let sortColumn = null;
-let sortDirection = 1; // 1 pour ascendant, -1 pour descendant
+let sortDirection = 1;
 
 // Fonction pour charger une vue
 async function loadView(viewName) {
@@ -17,14 +17,6 @@ async function loadView(viewName) {
     // Initialisation spécifique à la vue
     if (viewName === "affaires") {
       checkDataReady(initAffairesView);
-    } else if (viewName === "details-affaire") {
-      checkDataReady(initDetailsAffaireView);
-    } else if (viewName === "audiences") {
-      checkDataReady(initAudiencesView);
-    } else if (viewName === "membres") {
-      checkDataReady(initMembresView);
-    } else if (viewName === "modeles") {
-      checkDataReady(initModelesView);
     }
   } catch (error) {
     console.error("Erreur lors du chargement de la vue :", error);
@@ -46,11 +38,11 @@ function applyFilters() {
   let filtered = affairesData.filter(record => {
     if (!record) return false;
 
-    const numero = (record.Numero || record.numero || record['Numéro'] || record.numAffaire || "").toString().toLowerCase();
-    const misEnCause = (record["Mis en cause"] || record.misEnCause || record["Mis_en_cause"] || record.personne || "").toString().toLowerCase();
+    const numero = (record.Numero || record.numero || record['Numéro'] || "").toString().toLowerCase();
+    const misEnCause = (record["Mis en cause"] || record.misEnCause || record["Mis_en_cause"] || "").toString().toLowerCase();
     const searchMatch = !searchTerm || numero.includes(searchTerm) || misEnCause.includes(searchTerm);
 
-    const etat = record.Etat || record.etat || record['État'] || record.statut || "N/C";
+    const etat = record.Etat || record.etat || record['État'] || "N/C";
     const etatMatch = !filterEtat || etat === filterEtat;
 
     const ecole = record.Ecole || record.ecole || record['École'] || "N/C";
@@ -76,14 +68,11 @@ function applySort(records) {
   }
 
   if (!sortColumn) {
-    // Tri par défaut par date (du plus récent au plus ancien)
+    // Tri par défaut par numéro d'affaire
     return [...records].sort((a, b) => {
-      const dateA = getAffaireDate(a);
-      const dateB = getAffaireDate(b);
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-      return dateB - dateA;
+      const numeroA = a.Numero || a.numero || a['Numéro'] || "";
+      const numeroB = b.Numero || b.numero || b['Numéro'] || "";
+      return sortDirection * numeroA.localeCompare(numeroB);
     });
   }
 
@@ -95,38 +84,30 @@ function applySort(records) {
     // Récupérer les valeurs selon la colonne de tri
     switch(sortColumn) {
       case 'Numero':
-        valueA = a.Numero || a.numero || a['Numéro'] || a.numAffaire || "";
-        valueB = b.Numero || b.numero || b['Numéro'] || b.numAffaire || "";
+        valueA = a.Numero || a.numero || a['Numéro'] || "";
+        valueB = b.Numero || b.numero || b['Numéro'] || "";
         break;
       case 'Etat':
-        valueA = a.Etat || a.etat || a['État'] || a.statut || "";
-        valueB = b.Etat || b.etat || b['État'] || b.statut || "";
-        break;
-      case 'Date':
-        valueA = getAffaireDate(a);
-        valueB = getAffaireDate(b);
+        valueA = a.Etat || a.etat || a['État'] || "";
+        valueB = b.Etat || b.etat || b['État'] || "";
         break;
       case 'Ecole':
         valueA = a.Ecole || a.ecole || a['École'] || "";
         valueB = b.Ecole || b.ecole || b['École'] || "";
         break;
       case 'Mis en cause':
-        valueA = a["Mis en cause"] || a.misEnCause || a["Mis_en_cause"] || a.personne || "";
-        valueB = b["Mis en cause"] || b.misEnCause || b["Mis_en_cause"] || b.personne || "";
+        valueA = a["Mis en cause"] || a.misEnCause || a["Mis_en_cause"] || "";
+        valueB = b["Mis en cause"] || b.misEnCause || b["Mis_en_cause"] || "";
         break;
       default:
-        // Tri par défaut par date
-        valueA = getAffaireDate(a);
-        valueB = getAffaireDate(b);
+        // Tri par défaut par numéro d'affaire
+        valueA = a.Numero || a.numero || a['Numéro'] || "";
+        valueB = b.Numero || b.numero || b['Numéro'] || "";
     }
 
     // Comparaison selon le type de valeur
-    if (valueA instanceof Date && valueB instanceof Date) {
-      return sortDirection * (valueA - valueB);
-    } else if (typeof valueA === 'string' && typeof valueB === 'string') {
+    if (typeof valueA === 'string' && typeof valueB === 'string') {
       return sortDirection * valueA.localeCompare(valueB);
-    } else if (typeof valueA === 'number' && typeof valueB === 'number') {
-      return sortDirection * (valueA - valueB);
     } else {
       // Conversion en string pour comparaison
       return sortDirection * String(valueA).localeCompare(String(valueB));
@@ -185,49 +166,17 @@ function renderAffairesTable(records) {
 
     // Numéro (en gras)
     const numeroCell = document.createElement('td');
-    numeroCell.textContent = record.Numero || record.numero || record['Numéro'] || record.numAffaire || "N/C";
+    numeroCell.textContent = record.Numero || record.numero || record['Numéro'] || "N/C";
     numeroCell.style.padding = "12px";
     numeroCell.style.fontWeight = "bold";
     row.appendChild(numeroCell);
 
-    // État (avec surlignage selon la valeur)
+    // État
     const etatCell = document.createElement('td');
-    const etat = record.Etat || record.etat || record['État'] || record.statut || "N/C";
-
-    // Créer un span pour le surlignage
-    const etatSpan = document.createElement('span');
-    etatSpan.textContent = etat;
-    etatSpan.style.padding = "4px 8px";
-    etatSpan.style.borderRadius = "4px";
-    etatSpan.style.display = "inline-block";
-
-    // Appliquer le style selon l'état
-    if (etatColors[etat]) {
-      etatSpan.style.backgroundColor = etatColors[etat].background;
-      etatSpan.style.color = etatColors[etat].color;
-    }
-
+    const etat = record.Etat || record.etat || record['État'] || "N/C";
+    etatCell.textContent = etat;
     etatCell.style.padding = "12px";
-    etatCell.appendChild(etatSpan);
     row.appendChild(etatCell);
-
-    // Date de l'état
-    const dateCell = document.createElement('td');
-    let dateEtat = "N/C";
-    const possibleDateFields = ["Date de l état", "Date_de_l_etat", "dateEtat", "Date", "date", "dateStatut"];
-    for (const field of possibleDateFields) {
-      if (record[field]) {
-        try {
-          dateEtat = new Date(record[field]).toLocaleDateString("fr-FR");
-          break;
-        } catch (e) {
-          dateEtat = record[field];
-        }
-      }
-    }
-    dateCell.textContent = dateEtat;
-    dateCell.style.padding = "12px";
-    row.appendChild(dateCell);
 
     // École
     const ecoleCell = document.createElement('td');
@@ -237,27 +186,7 @@ function renderAffairesTable(records) {
 
     // Mis en cause
     const misEnCauseCell = document.createElement('td');
-    let misEnCause = "N/C";
-
-    const possibleMisEnCauseFields = [
-      "Mis en cause", "misEnCause", "Mis_en_cause",
-      "personne", "nomMisEnCause", "Personne mise en cause"
-    ];
-
-    for (const field of possibleMisEnCauseFields) {
-      if (record[field]) {
-        misEnCause = record[field];
-        if (Array.isArray(misEnCause) && misEnCause.length > 0) {
-          misEnCause = misEnCause[0];
-        }
-        break;
-      }
-    }
-
-    if (typeof misEnCause === 'object' && misEnCause !== null && !Array.isArray(misEnCause)) {
-      misEnCause = misEnCause.display || misEnCause.value || JSON.stringify(misEnCause);
-    }
-
+    let misEnCause = record["Mis en cause"] || record.misEnCause || record["Mis_en_cause"] || "N/C";
     misEnCauseCell.textContent = misEnCause;
     misEnCauseCell.style.padding = "12px";
     row.appendChild(misEnCauseCell);
@@ -297,8 +226,8 @@ function populateFilters() {
   }
 
   // Récupérer les valeurs uniques pour chaque filtre
-  const etats = [...new Set(affairesData.map(r => r.Etat || r.etat || r['État'] || r.statut || "N/C"))].filter(e => e !== "N/C");
-  const ecoles = [...new Set(affairesData.map(r => r.Ecole || r.ecole || r['École'] || r.nomEcole || "N/C"))].filter(e => e !== "N/C");
+  const etats = [...new Set(affairesData.map(r => r.Etat || r.etat || r['État'] || "N/C"))].filter(e => e !== "N/C");
+  const ecoles = [...new Set(affairesData.map(r => r.Ecole || r.ecole || r['École'] || "N/C"))].filter(e => e !== "N/C");
 
   filterEtat.innerHTML = '<option value="">Tous les états</option>';
   etats.forEach(etat => {
@@ -319,195 +248,73 @@ function populateFilters() {
 
 // Initialisation de la vue principale (affaires)
 function initAffairesView() {
-  checkDataReady(function() {
-    // Remplir les filtres
-    populateFilters();
+  // Remplir les filtres
+  populateFilters();
 
-    // Écouteurs d'événements pour la pagination
-    if (document.getElementById('itemsPerPage')) {
-      document.getElementById('itemsPerPage').addEventListener('change', function() {
-        itemsPerPage = parseInt(this.value);
-        currentPage = 1;
-        applyFilters();
-      });
-    }
-
-    if (document.getElementById('prevPage')) {
-      document.getElementById('prevPage').addEventListener('click', function() {
-        if (currentPage > 1) {
-          currentPage--;
-          applyFilters();
-        }
-      });
-    }
-
-    if (document.getElementById('nextPage')) {
-      document.getElementById('nextPage').addEventListener('click', function() {
-        const totalPages = Math.ceil(affairesData.length / itemsPerPage);
-        if (currentPage < totalPages) {
-          currentPage++;
-          applyFilters();
-        }
-      });
-    }
-
-    // Écouteurs d'événements pour les filtres
-    if (document.getElementById('searchInput')) {
-      document.getElementById('searchInput').addEventListener('input', applyFilters);
-    }
-    if (document.getElementById('filterEtat')) {
-      document.getElementById('filterEtat').addEventListener('change', applyFilters);
-    }
-    if (document.getElementById('filterEcole')) {
-      document.getElementById('filterEcole').addEventListener('change', applyFilters);
-    }
-
-    // Écouteurs d'événements pour le tri
-    document.querySelectorAll('.sort-icon').forEach(icon => {
-      icon.addEventListener('click', function() {
-        const column = this.getAttribute('data-column');
-
-        // Changer la direction de tri si on clique sur la même colonne
-        if (sortColumn === column) {
-          sortDirection *= -1; // Inverser la direction
-        } else {
-          sortColumn = column;
-          sortDirection = 1; // Réinitialiser à ascendant
-        }
-
-        // Mettre à jour les icônes de tri
-        document.querySelectorAll('.sort-icon').forEach(i => {
-          i.textContent = '↕';
-        });
-        this.textContent = sortDirection === 1 ? '↓' : '↑';
-
-        applyFilters(); // Re-appliquer les filtres avec le nouveau tri
-      });
+  // Écouteurs d'événements pour la pagination
+  if (document.getElementById('itemsPerPage')) {
+    document.getElementById('itemsPerPage').addEventListener('change', function() {
+      itemsPerPage = parseInt(this.value);
+      currentPage = 1;
+      applyFilters();
     });
+  }
 
-    // Appliquer les filtres initiaux
-    applyFilters();
+  if (document.getElementById('prevPage')) {
+    document.getElementById('prevPage').addEventListener('click', function() {
+      if (currentPage > 1) {
+        currentPage--;
+        applyFilters();
+      }
+    });
+  }
+
+  if (document.getElementById('nextPage')) {
+    document.getElementById('nextPage').addEventListener('click', function() {
+      const totalPages = Math.ceil(affairesData.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        applyFilters();
+      }
+    });
+  }
+
+  // Écouteurs d'événements pour les filtres
+  if (document.getElementById('searchInput')) {
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+  }
+  if (document.getElementById('filterEtat')) {
+    document.getElementById('filterEtat').addEventListener('change', applyFilters);
+  }
+  if (document.getElementById('filterEcole')) {
+    document.getElementById('filterEcole').addEventListener('change', applyFilters);
+  }
+
+  // Écouteurs d'événements pour le tri
+  document.querySelectorAll('.sort-icon').forEach(icon => {
+    icon.addEventListener('click', function() {
+      const column = this.getAttribute('data-column');
+
+      // Changer la direction de tri si on clique sur la même colonne
+      if (sortColumn === column) {
+        sortDirection *= -1; // Inverser la direction
+      } else {
+        sortColumn = column;
+        sortDirection = 1; // Réinitialiser à ascendant
+      }
+
+      // Mettre à jour les icônes de tri
+      document.querySelectorAll('.sort-icon').forEach(i => {
+        i.textContent = '↕';
+      });
+      this.textContent = sortDirection === 1 ? '↓' : '↑';
+
+      applyFilters(); // Re-appliquer les filtres avec le nouveau tri
+    });
   });
-}
 
-// Initialisation de la vue "détails d'une affaire"
-function initDetailsAffaireView() {
-  const affaireId = localStorage.getItem('currentAffaireId');
-  const affaire = getAffaireById(parseInt(affaireId));
-  if (!affaire) {
-    document.getElementById('main-content').innerHTML = "<p>Affaire non trouvée.</p>";
-    return;
-  }
-
-  document.getElementById('affaire-nom').textContent = `Affaire n°${affaire.Numero || 'Sans numéro'}`;
-
-  // Charger les membres
-  const membres = getMembresByAffaireId(affaireId);
-  const membresList = document.getElementById('membres-list');
-  membresList.innerHTML = membres.length > 0 ?
-    membres.map(membre => `
-      <div class="fr-card fr-enlarge-link fr-mb-3w">
-        <div class="fr-card__body">
-          <h5 class="fr-card__title">${membre.NOM || ''} ${membre.Prenom || ''}</h5>
-          <p class="fr-card__desc">${membre.Role || ''} (${membre.College || ''})</p>
-        </div>
-      </div>
-    `).join('') :
-    "<p>Aucun membre trouvé.</p>";
-
-  // Charger les parties
-  const parties = getPartiesByAffaireId(affaireId);
-  const partiesList = document.getElementById('parties-list');
-  partiesList.innerHTML = parties.length > 0 ?
-    parties.map(partie => `
-      <div class="fr-card fr-enlarge-link fr-mb-3w">
-        <div class="fr-card__body">
-          <h5 class="fr-card__title">${partie.Nom || ''} ${partie.Prenom || ''}</h5>
-          <p class="fr-card__desc">${partie.Qualite || ''} (${partie.Type || ''})</p>
-        </div>
-      </div>
-    `).join('') :
-    "<p>Aucune partie trouvée.</p>";
-
-  // Charger les audiences
-  const audiences = getAudiencesByAffaireId(affaireId);
-  const audiencesList = document.getElementById('audiences-list');
-  audiencesList.innerHTML = audiences.length > 0 ?
-    audiences.map(audience => `
-      <div class="fr-card fr-enlarge-link fr-mb-3w">
-        <div class="fr-card__body">
-          <h5 class="fr-card__title">Audience du ${audience.Date_et_heure ? new Date(audience.Date_et_heure).toLocaleDateString('fr-FR') : 'Date inconnue'}</h5>
-          <p class="fr-card__desc">Salle : ${audience.Salle || 'Non spécifiée'}</p>
-        </div>
-      </div>
-    `).join('') :
-    "<p>Aucune audience trouvée.</p>";
-}
-
-// Initialisation de la vue "Audiences"
-function initAudiencesView() {
-  if (!Array.isArray(audiencesData)) {
-    console.warn("audiencesData n'est pas un tableau.");
-    return;
-  }
-
-  const audiencesList = document.getElementById('audiences-list');
-  if (!audiencesList) {
-    console.warn("L'élément audiencesList n'existe pas.");
-    return;
-  }
-
-  if (audiencesData.length === 0) {
-    audiencesList.innerHTML = "<p>Aucune audience trouvée.</p>";
-    return;
-  }
-
-  audiencesList.innerHTML = audiencesData
-    .map(audience => `
-      <div class="fr-card fr-enlarge-link fr-mb-3w">
-        <div class="fr-card__body">
-          <h5 class="fr-card__title">Audience du ${audience.Date_et_heure ? new Date(audience.Date_et_heure).toLocaleDateString('fr-FR') : 'Date inconnue'}</h5>
-          <p class="fr-card__desc">Salle : ${audience.Salle || 'Non spécifiée'}</p>
-        </div>
-      </div>
-    `)
-    .join('');
-}
-
-// Initialisation de la vue "Membres"
-function initMembresView() {
-  if (!Array.isArray(membresData)) {
-    console.warn("membresData n'est pas un tableau.");
-    return;
-  }
-
-  const membresList = document.getElementById('membres-list');
-  if (!membresList) {
-    console.warn("L'élément membresList n'existe pas.");
-    return;
-  }
-
-  if (membresData.length === 0) {
-    membresList.innerHTML = "<p>Aucun membre trouvé.</p>";
-    return;
-  }
-
-  membresList.innerHTML = membresData
-    .map(membre => `
-      <div class="fr-card fr-enlarge-link fr-mb-3w">
-        <div class="fr-card__body">
-          <h5 class="fr-card__title">${membre.NOM || ''} ${membre.Prenom || ''}</h5>
-          <p class="fr-card__desc">${membre.Role || ''} (${membre.College || ''})</p>
-        </div>
-      </div>
-    `)
-    .join('');
-}
-
-// Initialisation de la vue "Modèles"
-function initModelesView() {
-  // À développer selon vos besoins
-  document.getElementById('main-content').innerHTML += "<p>Vue des modèles de documents à développer.</p>";
+  // Appliquer les filtres initiaux
+  applyFilters();
 }
 
 // Gestion du menu
