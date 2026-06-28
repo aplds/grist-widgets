@@ -33,7 +33,6 @@ grist.onRecords(function(table) {
   try {
     console.log(`Table reçue : ${table.name}`);
 
-    // Vérifiez que table.records est défini et est un tableau
     if (!table || !table.records) {
       console.warn(`La table ${table ? table.name : 'inconnue'} ne contient pas de propriété "records".`);
       return;
@@ -49,6 +48,7 @@ grist.onRecords(function(table) {
     switch (table.name) {
       case "Affaires":
         affairesData = Array.isArray(table.records) ? table.records : [];
+        isDataLoaded = true;
         break;
       case "Parties":
         partiesData = Array.isArray(table.records) ? table.records : [];
@@ -76,30 +76,40 @@ grist.onRecords(function(table) {
         break;
     }
 
-    // Marquer les données comme prêtes si la table "Affaires" est chargée
-    if (table.name === "Affaires" && table.records.length > 0) {
-      isDataLoaded = true;
-      console.log("Données prêtes !");
-    }
+    console.log("Données prêtes !");
   } catch (error) {
     console.error("Erreur lors du traitement des enregistrements :", error);
   }
 });
 
-// Charger explicitement la table "Affaires" si elle n'est pas reçue automatiquement
+// Charger explicitement la table "Affaires"
 function loadAffairesTable() {
-  grist.docApi.fetchTable('Affaires').then(function(table) {
-    affairesData = table;
-    isDataLoaded = true;
-    console.log("Affaires chargées via fetchTable :", affairesData);
-  }).catch(function(error) {
-    console.error("Erreur lors du chargement de la table Affaires :", error);
-  });
+  grist.docApi.fetchTable('Affaires')
+    .then(function(table) {
+      if (!table) {
+        console.warn("La table 'Affaires' n'a pas pu être chargée.");
+        affairesData = [];
+        return;
+      }
+
+      if (!Array.isArray(table)) {
+        console.warn("Les données de la table 'Affaires' ne sont pas un tableau.");
+        affairesData = [];
+      } else {
+        affairesData = table;
+      }
+      isDataLoaded = true;
+      console.log("Affaires chargées via fetchTable :", affairesData);
+    })
+    .catch(function(error) {
+      console.error("Erreur lors du chargement de la table Affaires :", error);
+      affairesData = [];
+    });
 }
 
 // Vérifier si les données sont prêtes
 function checkDataReady(callback) {
-  if (isDataLoaded) {
+  if (isDataLoaded && Array.isArray(affairesData) && affairesData.length > 0) {
     callback();
   } else {
     console.log("Données non encore prêtes, réessai dans 200ms...");
@@ -109,8 +119,8 @@ function checkDataReady(callback) {
 
 // Fonction pour récupérer une affaire par son ID
 function getAffaireById(id) {
-  if (!isDataLoaded) {
-    console.warn("Les données ne sont pas encore chargées !");
+  if (!Array.isArray(affairesData)) {
+    console.warn("affairesData n'est pas un tableau.");
     return null;
   }
   return affairesData.find(affaire => affaire.id === id);
@@ -118,8 +128,8 @@ function getAffaireById(id) {
 
 // Fonction pour récupérer les parties d'une affaire
 function getPartiesByAffaireId(affaireId) {
-  if (!isDataLoaded) {
-    console.warn("Les données ne sont pas encore chargées !");
+  if (!Array.isArray(partiesData)) {
+    console.warn("partiesData n'est pas un tableau.");
     return [];
   }
   return partiesData.filter(partie => partie.Affaire === affaireId);
@@ -127,8 +137,8 @@ function getPartiesByAffaireId(affaireId) {
 
 // Fonction pour récupérer les membres d'une affaire
 function getMembresByAffaireId(affaireId) {
-  if (!isDataLoaded) {
-    console.warn("Les données ne sont pas encore chargées !");
+  if (!Array.isArray(membresData) || !Array.isArray(affairesData)) {
+    console.warn("membresData ou affairesData n'est pas un tableau.");
     return [];
   }
   const affaire = getAffaireById(affaireId);
@@ -139,8 +149,8 @@ function getMembresByAffaireId(affaireId) {
 
 // Fonction pour récupérer les audiences d'une affaire
 function getAudiencesByAffaireId(affaireId) {
-  if (!isDataLoaded) {
-    console.warn("Les données ne sont pas encore chargées !");
+  if (!Array.isArray(audiencesData)) {
+    console.warn("audiencesData n'est pas un tableau.");
     return [];
   }
   return audiencesData.filter(audience => audience.Affaire === affaireId);
@@ -148,6 +158,8 @@ function getAudiencesByAffaireId(affaireId) {
 
 // Fonction pour obtenir la date d'une affaire
 function getAffaireDate(affaire) {
+  if (!affaire) return null;
+
   const possibleDateFields = ["Date de l état", "Date_de_l_etat", "dateEtat", "Date", "date", "dateStatut"];
   for (const field of possibleDateFields) {
     if (affaire[field]) {
@@ -162,4 +174,4 @@ function getAffaireDate(affaire) {
 }
 
 // Initialisation
-loadAffairesTable();
+grist.ready().then(loadAffairesTable);
