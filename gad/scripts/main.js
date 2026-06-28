@@ -3,17 +3,6 @@
  */
 
 // Initialisation de l'application
-document.addEventListener('DOMContentLoaded', () => {
-    // Configuration de la navigation
-    setupNavigation();
-
-    // Chargement de la page par défaut
-    loadPage('home');
-});
-
-/**
- * Configure la navigation
- */
 function setupNavigation() {
     document.querySelectorAll('.fr-nav__link').forEach(link => {
         link.addEventListener('click', (e) => {
