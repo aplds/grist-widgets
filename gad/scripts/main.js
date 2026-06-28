@@ -1,67 +1,141 @@
-// Routage simple pour charger les différentes pages
-document.addEventListener("DOMContentLoaded", () => {
-    // Chargement initial de la page d'accueil
-    loadPage("home");
+/**
+ * Module principal de l'application
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialisation
+    initApp();
+});
 
-    // Gestion des liens de navigation
-    document.querySelectorAll("[data-page]").forEach(link => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const page = e.target.getAttribute("data-page");
+/**
+ * Initialise l'application
+ */
+function initApp() {
+    // Chargement de la page d'accueil par défaut
+    loadPage('home');
+
+    // Configuration des boutons de navigation
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Mise à jour de l'état actif
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
+            // Chargement de la page
+            const page = button.getAttribute('data-page');
             loadPage(page);
         });
     });
-});
+}
 
-// Chargement d'une page
+/**
+ * Charge une page spécifique
+ * @param {string} page - Nom de la page à charger
+ */
 function loadPage(page) {
-    const content = document.getElementById("main-content");
-    content.innerHTML = `<div class="fr-container fr-py-6w"><h2>Chargement en cours...</h2></div>`;
+    const contentElement = document.getElementById('app-content');
+    contentElement.innerHTML = '<div class="loading">Chargement en cours...</div>';
 
-    switch (page) {
-        case "home":
-            loadAffairs();
+    switch(page) {
+        case 'home':
+            loadHomePage();
             break;
-        case "members":
+        case 'members':
             loadMembersPage();
             break;
-        case "hearings":
+        case 'hearings':
             loadHearingsPage();
             break;
-        case "templates":
+        case 'templates':
             loadTemplatesPage();
             break;
         default:
-            content.innerHTML = `<div class="fr-container fr-py-6w"><h2>Page non trouvée</h2></div>`;
+            contentElement.innerHTML = '<div class="error">Page non trouvée</div>';
     }
 }
 
-// Chargement de la page de gestion des membres
-async function loadMembersPage() {
+/**
+ * Affiche un message d'erreur
+ * @param {string} message - Message d'erreur
+ */
+function showError(message) {
+    const contentElement = document.getElementById('app-content');
+    contentElement.innerHTML = `<div class="error">${message}</div>`;
+    console.error(message);
+}
+
+/**
+ * Formate une date en français
+ * @param {string|Date} date - Date à formater
+ * @returns {string} - Date formatée
+ */
+function formatFrenchDate(date) {
+    if (!date) return 'Non spécifiée';
+
     try {
-        const members = await gristApi.fetchMembers();
-        renderMembersPage(members);
-    } catch (error) {
-        console.error("Erreur lors du chargement des membres :", error);
+        const d = new Date(date);
+        return d.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch {
+        return 'Date invalide';
     }
 }
 
-// Chargement de la page de gestion des audiences
-async function loadHearingsPage() {
-    try {
-        const hearings = await gristApi.fetchHearings();
-        renderHearingsPage(hearings);
-    } catch (error) {
-        console.error("Erreur lors du chargement des audiences :", error);
-    }
+/**
+ * Échappe les caractères HTML
+ * @param {string} str - Chaîne à échapper
+ * @returns {string} - Chaîne échappée
+ */
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
-// Chargement de la page de gestion des modèles
-async function loadTemplatesPage() {
-    try {
-        const templates = await gristApi.fetchTemplates();
-        renderTemplatesPage(templates);
-    } catch (error) {
-        console.error("Erreur lors du chargement des modèles :", error);
-    }
+/**
+ * Ouvre une modale
+ * @param {string} title - Titre de la modale
+ * @param {string} content - Contenu HTML de la modale
+ * @param {string} modalId - ID de la modale
+ */
+function openModal(title, content, modalId = 'app-modal') {
+    // Fermeture des modales existantes
+    closeModal();
+
+    // Création de la modale
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = modalId;
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>${title}</h2>
+            ${content}
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Ajout d'un bouton de fermeture
+    const closeButton = document.createElement('button');
+    closeButton.className = 'button secondary';
+    closeButton.textContent = 'Fermer';
+    closeButton.addEventListener('click', () => closeModal(modalId));
+
+    const modalContent = modal.querySelector('.modal-content');
+    modalContent.appendChild(closeButton);
+}
+
+/**
+ * Ferme une modale
+ * @param {string} modalId - ID de la modale à fermer
+ */
+function closeModal(modalId = 'app-modal') {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.remove();
 }
