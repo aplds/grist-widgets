@@ -10,32 +10,43 @@
                 <button class="fr-tabs__tab" id="tab-membres" tabindex="-1" role="tab" aria-selected="false">Membres</button>
             </li>
             <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-parties" tabindex="-1" role="tab" aria-selected="false">Parties</button>
+            </li>
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-audiences" tabindex="-1" role="tab" aria-selected="false">Audiences</button>
+            </li>
+            <li role="presentation">
                 <button class="fr-tabs__tab" id="tab-courriers" tabindex="-1" role="tab" aria-selected="false">Courriers</button>
             </li>
             <li role="presentation">
                 <button class="fr-tabs__tab" id="tab-decisions" tabindex="-1" role="tab" aria-selected="false">Décisions</button>
             </li>
-            <li role="presentation">
-                <button class="fr-tabs__tab" id="tab-rapports" tabindex="-1" role="tab" aria-selected="false">Rapports d'instruction</button>
-            </li>
-            <li role="presentation">
-                <button class="fr-tabs__tab" id="tab-jugements" tabindex="-1" role="tab" aria-selected="false">Jugements</button>
-            </li>
         </ul>
+
+        <!-- Panneau pour les membres -->
         <div id="tab-membres-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-membres">
-            <!-- Contenu des membres -->
+            <h3>Membres convoqués</h3>
+            <div id="membres-list"></div>
         </div>
+
+        <!-- Panneau pour les parties -->
+        <div id="tab-parties-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-parties">
+            <h3>Parties impliquées</h3>
+            <div id="parties-list"></div>
+        </div>
+
+        <!-- Panneau pour les audiences -->
+        <div id="tab-audiences-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-audiences">
+            <h3>Audiences</h3>
+            <div id="audiences-list"></div>
+        </div>
+
+        <!-- Panneaux pour les courriers, décisions, etc. -->
         <div id="tab-courriers-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-courriers">
             <!-- Contenu des courriers -->
         </div>
         <div id="tab-decisions-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-decisions">
             <!-- Contenu des décisions -->
-        </div>
-        <div id="tab-rapports-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-rapports">
-            <!-- Contenu des rapports -->
-        </div>
-        <div id="tab-jugements-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-jugements">
-            <!-- Contenu des jugements -->
         </div>
     </div>
 </div>
