@@ -1,117 +1,85 @@
-/* Styles complémentaires au DSFR */
+/* Styles de base */
 :root {
-  --custom-primary: #000091; /* Bleu Marianne */
-  --custom-secondary: #f5f5fe; /* Bleu très clair */
-  --custom-text: #1e1e1e; /* Gris foncé */
+    --primary-color: #000091;
+    --secondary-color: #f5f5fe;
+    --text-color: #1e1e1e;
+    --light-gray: #e5e5e5;
+    --border-color: #ddd;
+    --radius: 4px;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Conteneur principal */
 .fr-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 /* Navigation active */
 .fr-nav__link.active {
-  color: var(--custom-primary);
-  font-weight: bold;
-  border-bottom: 2px solid var(--custom-primary);
+    color: var(--primary-color);
+    font-weight: bold;
+    border-bottom: 2px solid var(--primary-color);
 }
 
-/* Tableaux personnalisés */
-.custom-table {
-  width: 100%;
-  margin: 1.5rem 0;
+/* Tableaux */
+.fr-table {
+    margin: 1.5rem 0;
 }
 
-.custom-table th,
-.custom-table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+/* Badges */
+.fr-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
 }
 
-.custom-table th {
-  background-color: var(--custom-secondary);
-  font-weight: bold;
+/* Espacement */
+.fr-py-6w {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
 }
 
-/* Badges personnalisés */
-.custom-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.custom-badge.info {
-  background-color: #e7f1fa;
-  color: #0066cc;
-}
-
-.custom-badge.warning {
-  background-color: #fef3e0;
-  color: #cc7a00;
-}
-
-.custom-badge.success {
-  background-color: #e6f4ea;
-  color: #00994d;
-}
-
-/* Espacement des éléments */
-.spacer {
-  margin: 1.5rem 0;
+/* Boutons personnalisés */
+.action-button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Conteneur pour les onglets */
 .tab-container {
-  margin: 2rem 0;
+    margin: 2rem 0;
 }
 
-/* Style pour les boutons d'action */
-.action-button {
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
+/* Modales */
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-/* Style pour les formulaires */
-.custom-form {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Style pour les modales */
-.custom-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.custom-modal-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 4px;
-  max-width: 800px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .fr-header__menu-links {
-    display: block;
-  }
+    .fr-header__menu-links {
+        display: block;
+    }
 }
