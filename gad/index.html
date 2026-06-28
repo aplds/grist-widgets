@@ -8,37 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
     <!-- DSFR CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
-    <!-- Utility classes DSFR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/utility/utility.min.css">
     <!-- Nos styles -->
     <link rel="stylesheet" href="styles/main.css">
-    <style>
-        /* Styles pour les logos DSFR */
-        .custom-header-logo {
-            height: 6rem;
-            width: auto;
-        }
-        .custom-institut-logo {
-            height: 4rem;
-            width: auto;
-            margin-left: 1rem;
-        }
-        /* Pleine largeur */
-        body {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        .fr-container {
-            width: 100%;
-            max-width: none;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-    </style>
 </head>
 <body>
-    <!-- En-tête DSFR conforme avec logos haute qualité -->
+    <!-- En-tête DSFR conforme -->
     <header role="banner" class="fr-header">
         <div class="fr-header__body">
             <div class="fr-container">
@@ -53,7 +28,7 @@
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
                                  alt="Institut Agro"
-                                 class="custom-institut-logo fr-responsive-img">
+                                 style="height: 4rem; width: auto; margin-left: 1rem;">
                         </div>
                     </div>
                     <div class="fr-header__service">
@@ -74,24 +49,22 @@
                         <li class="fr-nav__item">
                             <a class="fr-nav__link active" href="#" data-page="home" id="nav-home">Accueil</a>
                         </li>
-                        <li class="fr-nav__item">
-                            <a class="fr-nav__link" href="#" data-page="members" id="nav-members">Membres</a>
-                        </li>
-                        <li class="fr-nav__item">
-                            <a class="fr-nav__link" href="#" data-page="hearings" id="nav-hearings">Audiences</a>
-                        </li>
-                        <li class="fr-nav__item">
-                            <a class="fr-nav__link" href="#" data-page="templates" id="nav-templates">Modèles</a>
-                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Contenu principal en pleine largeur -->
-    <main id="app-content" class="fr-container fr-py-6w">
-        <!-- Contenu chargé dynamiquement -->
+    <!-- Contenu principal -->
+    <main id="app-content" class="fr-container fr-py-4w">
+        <div class="fr-grid-row fr-grid-row--gutters">
+            <div class="fr-col-12">
+                <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
+                <div id="affaires-container">
+                    <!-- Le contenu sera chargé ici -->
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Pied de page -->
@@ -99,7 +72,7 @@
         <div class="fr-container">
             <div class="fr-footer__body">
                 <div class="fr-footer__brand fr-enlarge-link">
-                    <a href="/" title="Retour à l'accueil - République Française">
+                    <a href="/" title="Retour à l'accueil">
                         <p class="fr-logo">
                             République
                             <br>française
@@ -115,63 +88,119 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Initialisation de l'application -->
+    <!-- Script principal -->
     <script>
-        // Fonction pour initialiser l'application quand Grist est prêt
-        function initApp() {
-            // Vérifier si Grist est disponible
-            if (typeof grist !== 'undefined' && grist.docApi) {
-                // Initialiser le DSFR
-                if (window.dsfr) {
-                    window.dsfr.start();
+        // Attendre que Grist soit prêt
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser le DSFR
+            if (window.dsfr) {
+                window.dsfr.start();
+            }
+
+            // Fonction pour charger les affaires
+            async function loadAffaires() {
+                try {
+                    const container = document.getElementById('affaires-container');
+                    container.innerHTML = '<div class="fr-callout fr-callout--info">Chargement en cours...</div>';
+
+                    // Dans un widget Grist, on utilise fetchSelectedTable pour la table active
+                    const affaires = await grist.docApi.fetchSelectedTable();
+
+                    if (!affaires || affaires.length === 0) {
+                        container.innerHTML = `
+                            <div class="fr-callout fr-callout--info">
+                                <h3 class="fr-callout__title">Aucune affaire trouvée</h3>
+                                <p class="fr-callout__text">Il n'y a actuellement aucune affaire enregistrée.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    renderAffairesTable(affaires);
+                } catch (error) {
+                    console.error("Erreur lors du chargement des affaires:", error);
+                    document.getElementById('affaires-container').innerHTML = `
+                        <div class="fr-callout fr-callout--error">
+                            <h3 class="fr-callout__title">Erreur de chargement</h3>
+                            <p class="fr-callout__text">Impossible de charger les affaires: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Fonction pour afficher le tableau des affaires
+            function renderAffairesTable(affaires) {
+                const container = document.getElementById('affaires-container');
+
+                // Vérifier la structure des données
+                console.log("Données reçues:", affaires);
+
+                // Vérifier si les affaires ont des propriétés attendues
+                const hasExpectedStructure = affaires.length > 0 &&
+                    (affaires[0].id || affaires[0].Mis_en_cause || affaires[0].Ecole);
+
+                if (!hasExpectedStructure) {
+                    container.innerHTML = `
+                        <div class="fr-callout fr-callout--warning">
+                            <h3 class="fr-callout__title">Structure de données inattendue</h3>
+                            <p class="fr-callout__text">Les données ne correspondent pas à la structure attendue.</p>
+                            <pre>${JSON.stringify(affaires.slice(0, 2), null, 2)}</pre>
+                        </div>
+                    `;
+                    return;
                 }
 
-                // Créer l'API Grist globale
-                window.GristAPI = {
-                    fetchTable: function(tableName) {
-                        return grist.docApi.fetchTable(tableName);
-                    },
-                    fetchRecord: function(tableName, recordId) {
-                        return grist.docApi.fetchSelectedRecord(tableName, recordId);
-                    },
-                    fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
-                        return grist.docApi.fetchTable(tableName, {
-                            filter: { [foreignKey]: foreignKeyValue }
-                        });
-                    },
-                    addRecord: function(tableName, data) {
-                        return grist.docApi.addRecord(tableName, data);
-                    },
-                    updateRecord: function(tableName, recordId, data) {
-                        return grist.docApi.updateRecord(tableName, recordId, data);
-                    }
-                };
+                container.innerHTML = `
+                    <div class="fr-table fr-table--layout-fixed">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Mis en cause</th>
+                                    <th>École</th>
+                                    <th>État</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${affaires.map(affaire => {
+                                    // Gestion des données manquantes
+                                    const id = affaire.id || affaire.Id || 'N/A';
+                                    const misEnCause = affaire.Mis_en_cause || affaire['Mis en cause'] || 'Non spécifié';
+                                    const ecole = affaire.Ecole || affaire.École || 'Non spécifiée';
+                                    const etat = affaire.Etat || affaire.État || 'Non spécifié';
+                                    const date = affaire.Date_etat ? new Date(affaire.Date_etat).toLocaleDateString('fr-FR') : 'Non spécifiée';
 
-                // Initialiser la navigation
-                setupNavigation();
-                loadPage('home');
-            } else {
-                // Réessayer après un court délai
-                setTimeout(initApp, 100);
+                                    return `
+                                        <tr>
+                                            <td>${id}</td>
+                                            <td>${misEnCause}</td>
+                                            <td>${ecole}</td>
+                                            <td><span class="fr-badge fr-badge--sm ${getBadgeClass(etat)}">${etat}</span></td>
+                                            <td>${date}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
             }
-        }
 
-        // Démarrer l'initialisation quand la page est chargée
-        document.addEventListener('DOMContentLoaded', initApp);
+            // Fonction pour déterminer la classe du badge
+            function getBadgeClass(status) {
+                const classes = {
+                    "Pré-enregistrée": "fr-badge--info",
+                    "En instruction": "fr-badge--warning",
+                    "Clôturée": "fr-badge--success",
+                    "Annulée": "fr-badge--error"
+                };
+                return classes[status] || "fr-badge--info";
+            }
 
-        // Déclarations des fonctions globales (seront définies dans main.js)
-        function setupNavigation() {}
-        function loadPage(page) {}
-        function showError(message) {}
-        function formatFrenchDate(date) {}
-        function escapeHtml(str) {}
-        function openModal(title, content, modalId) {}
-        function closeModal(modalId) {}
-        function loadHomePage() {}
-        function loadAffairDetail(affairId) {}
+            // Charger les affaires au démarrage
+            loadAffaires();
+        });
     </script>
-    <!-- Nos scripts -->
-    <script src="scripts/main.js"></script>
-    <script src="scripts/home.js"></script>
 </body>
 </html>
