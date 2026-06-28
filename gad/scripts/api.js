@@ -1,5 +1,6 @@
 /**
  * Module d'interaction avec l'API Grist
+ * Utilisation correcte de la Grist Plugin API
  */
 const GristAPI = {
     /**
@@ -9,10 +10,12 @@ const GristAPI = {
      */
     async fetchTable(tableName) {
         try {
-            return await grist.docApi.fetchTable(tableName);
+            // Utilisation de la méthode correcte de l'API Grist
+            const records = await gristDoc.docApi.fetchTable(tableName);
+            return records || [];
         } catch (error) {
             console.error(`Erreur lors de la récupération de ${tableName}:`, error);
-            throw new Error(`Impossible de charger les données de ${tableName}`);
+            throw new Error(`Impossible de charger les données de ${tableName}: ${error.message}`);
         }
     },
 
@@ -24,10 +27,30 @@ const GristAPI = {
      */
     async fetchRecord(tableName, recordId) {
         try {
-            return await grist.docApi.fetchTable(tableName, { recordId });
+            // Utilisation de fetchSelectedRecord pour un enregistrement spécifique
+            return await gristDoc.docApi.fetchSelectedRecord(tableName, recordId);
         } catch (error) {
             console.error(`Erreur lors de la récupération de ${tableName}#${recordId}:`, error);
-            throw new Error(`Impossible de charger l'enregistrement ${recordId} de ${tableName}`);
+            throw new Error(`Impossible de charger l'enregistrement ${recordId} de ${tableName}: ${error.message}`);
+        }
+    },
+
+    /**
+     * Récupère les enregistrements liés via une table de jointure
+     * @param {string} tableName - Nom de la table
+     * @param {string} foreignKey - Clé étrangère
+     * @param {number} foreignKeyValue - Valeur de la clé étrangère
+     * @returns {Promise<Array>} - Liste des enregistrements liés
+     */
+    async fetchRelatedRecords(tableName, foreignKey, foreignKeyValue) {
+        try {
+            // Utilisation de fetchTable avec un filtre
+            return await gristDoc.docApi.fetchTable(tableName, {
+                filter: { [foreignKey]: foreignKeyValue }
+            });
+        } catch (error) {
+            console.error(`Erreur lors de la récupération des enregistrements liés dans ${tableName}:`, error);
+            throw new Error(`Impossible de charger les enregistrements liés dans ${tableName}: ${error.message}`);
         }
     },
 
@@ -39,10 +62,10 @@ const GristAPI = {
      */
     async addRecord(tableName, data) {
         try {
-            return await grist.docApi.addRecord(tableName, data);
+            return await gristDoc.docApi.addRecord(tableName, data);
         } catch (error) {
             console.error(`Erreur lors de l'ajout dans ${tableName}:`, error);
-            throw new Error(`Impossible d'ajouter l'enregistrement dans ${tableName}`);
+            throw new Error(`Impossible d'ajouter l'enregistrement dans ${tableName}: ${error.message}`);
         }
     },
 
@@ -55,28 +78,10 @@ const GristAPI = {
      */
     async updateRecord(tableName, recordId, data) {
         try {
-            return await grist.docApi.updateRecord(tableName, recordId, data);
+            return await gristDoc.docApi.updateRecord(tableName, recordId, data);
         } catch (error) {
             console.error(`Erreur lors de la mise à jour de ${tableName}#${recordId}:`, error);
-            throw new Error(`Impossible de mettre à jour l'enregistrement ${recordId} dans ${tableName}`);
-        }
-    },
-
-    /**
-     * Récupère les enregistrements liés
-     * @param {string} tableName - Nom de la table
-     * @param {string} foreignKey - Clé étrangère
-     * @param {number} foreignKeyValue - Valeur de la clé étrangère
-     * @returns {Promise<Array>} - Liste des enregistrements liés
-     */
-    async fetchRelatedRecords(tableName, foreignKey, foreignKeyValue) {
-        try {
-            return await grist.docApi.fetchTable(tableName, {
-                filter: { [foreignKey]: foreignKeyValue }
-            });
-        } catch (error) {
-            console.error(`Erreur lors de la récupération des enregistrements liés dans ${tableName}:`, error);
-            throw new Error(`Impossible de charger les enregistrements liés dans ${tableName}`);
+            throw new Error(`Impossible de mettre à jour l'enregistrement ${recordId} dans ${tableName}: ${error.message}`);
         }
     }
 };
