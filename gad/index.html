@@ -101,53 +101,57 @@
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
     <!-- Scripts -->
     <script>
-        // Initialisation de l'API Grist pour les widgets
+        // Attendre que Grist soit prêt
         document.addEventListener('DOMContentLoaded', function() {
-            // Dans un widget Grist, l'API est disponible globalement
-            window.GristAPI = {
-                /**
-                 * Récupère toutes les lignes d'une table
-                 */
-                fetchTable: function(tableName) {
-                    return grist.docApi.fetchTable(tableName);
-                },
-
-                /**
-                 * Récupère un enregistrement spécifique
-                 */
-                fetchRecord: function(tableName, recordId) {
-                    return grist.docApi.fetchSelectedRecord(tableName, recordId);
-                },
-
-                /**
-                 * Récupère les enregistrements liés
-                 */
-                fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
-                    return grist.docApi.fetchTable(tableName, {
-                        filter: { [foreignKey]: foreignKeyValue }
-                    });
-                },
-
-                /**
-                 * Ajoute un nouvel enregistrement
-                 */
-                addRecord: function(tableName, data) {
-                    return grist.docApi.addRecord(tableName, data);
-                },
-
-                /**
-                 * Met à jour un enregistrement
-                 */
-                updateRecord: function(tableName, recordId, data) {
-                    return grist.docApi.updateRecord(tableName, recordId, data);
-                }
-            };
-
             // Initialisation du DSFR
             if (window.dsfr) {
                 window.dsfr.start();
             }
+
+            // Fonction pour initialiser l'API Grist quand elle est prête
+            function initGristAPI() {
+                if (typeof grist !== 'undefined' && grist.docApi) {
+                    window.GristAPI = {
+                        fetchTable: function(tableName) {
+                            return grist.docApi.fetchTable(tableName);
+                        },
+                        fetchRecord: function(tableName, recordId) {
+                            return grist.docApi.fetchSelectedRecord(tableName, recordId);
+                        },
+                        fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
+                            return grist.docApi.fetchTable(tableName, {
+                                filter: { [foreignKey]: foreignKeyValue }
+                            });
+                        },
+                        addRecord: function(tableName, data) {
+                            return grist.docApi.addRecord(tableName, data);
+                        },
+                        updateRecord: function(tableName, recordId, data) {
+                            return grist.docApi.updateRecord(tableName, recordId, data);
+                        }
+                    };
+
+                    // L'API est prête, on peut charger la page
+                    setupNavigation();
+                    loadPage('home');
+                } else {
+                    // Réessayer après un court délai
+                    setTimeout(initGristAPI, 100);
+                }
+            }
+
+            // Démarrer l'initialisation
+            initGristAPI();
         });
+
+        // Fonctions globales qui seront définies dans main.js
+        function setupNavigation() {}
+        function loadPage(page) {}
+        function showError(message) {}
+        function formatFrenchDate(date) {}
+        function escapeHtml(str) {}
+        function openModal(title, content, modalId) {}
+        function closeModal(modalId) {}
     </script>
     <script src="scripts/main.js"></script>
     <script src="scripts/home.js"></script>
