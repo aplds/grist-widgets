@@ -8,10 +8,11 @@
 }
 
 /* Correction des logos */
-.fr-header__operator img {
+.custom-institut-logo {
     height: 4rem;
     width: auto;
     object-fit: contain;
+    margin-left: 1rem;
 }
 
 /* Tableaux */
@@ -23,12 +24,6 @@
 .fr-table table {
     width: 100%;
     table-layout: fixed;
-}
-
-.fr-table th,
-.fr-table td {
-    word-break: break-word;
-    overflow-wrap: break-word;
 }
 
 /* Badges */
@@ -55,11 +50,7 @@
         padding: 0 1rem;
     }
 
-    .fr-header__operator img {
+    .custom-institut-logo {
         height: 3rem;
-    }
-
-    .fr-table {
-        font-size: 0.8rem;
     }
 }
