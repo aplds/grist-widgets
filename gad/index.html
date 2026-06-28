@@ -9,30 +9,8 @@
     <!-- DSFR CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/utility/utility.min.css">
-    <style>
-        /* Styles pour les logos DSFR */
-        .fr-header__operator img {
-            height: 4rem;
-            width: auto;
-            object-fit: contain;
-            margin-left: 1rem;
-        }
-        /* Pleine largeur */
-        .fr-container {
-            width: 100%;
-            max-width: none;
-            padding: 0 1.5rem;
-        }
-        /* Conteneur des affaires */
-        #affaires-container {
-            min-height: 300px;
-        }
-        /* Tableaux */
-        .fr-table {
-            width: 100%;
-            margin: 1.5rem 0;
-        }
-    </style>
+    <!-- Nos styles -->
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
     <!-- En-tête DSFR conforme -->
@@ -50,7 +28,7 @@
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
                                  alt="Institut Agro"
-                                 class="fr-responsive-img">
+                                 class="fr-responsive-img custom-institut-logo">
                         </div>
                     </div>
                     <div class="fr-header__service">
@@ -100,156 +78,9 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Script principal -->
-    <script>
-        // Fonction pour vérifier si Grist est prêt
-        function checkGristReady() {
-            return new Promise((resolve) => {
-                if (typeof grist !== 'undefined' && grist.ready) {
-                    resolve();
-                } else {
-                    setTimeout(() => checkGristReady().then(resolve), 100);
-                }
-            });
-        }
-
-        // Fonction principale
-        async function initApp() {
-            try {
-                // Attendre que Grist soit prêt
-                await checkGristReady();
-
-                // Initialiser le DSFR
-                if (window.dsfr) {
-                    window.dsfr.start();
-                }
-
-                // Initialiser l'API Grist avec les permissions nécessaires
-                grist.ready({
-                    requiredAccess: 'read selected table'
-                });
-
-                // Variable pour stocker les affaires
-                let affaires = [];
-
-                // Écouteur pour les changements de sélection
-                grist.on('record', function() {
-                    updateAffaires();
-                });
-
-                // Écouteur pour les changements de table
-                grist.on('message', function(msg) {
-                    if (msg.type === 'table') {
-                        affaires = msg.selectedTable;
-                        renderAffaires();
-                    }
-                });
-
-                // Fonction pour mettre à jour les affaires
-                async function updateAffaires() {
-                    try {
-                        affaires = await grist.docApi.fetchSelectedTable();
-                        renderAffaires();
-                    } catch (error) {
-                        console.error("Erreur lors de la mise à jour:", error);
-                        showError("Impossible de mettre à jour les affaires");
-                    }
-                }
-
-                // Fonction pour afficher les affaires
-                function renderAffaires() {
-                    const container = document.getElementById('affaires-container');
-
-                    if (!affaires || affaires.length === 0) {
-                        container.innerHTML = `
-                            <div class="fr-callout fr-callout--info">
-                                <h3 class="fr-callout__title">Aucune affaire trouvée</h3>
-                                <p class="fr-callout__text">Il n'y a actuellement aucune affaire enregistrée.</p>
-                            </div>
-                        `;
-                        return;
-                    }
-
-                    // Afficher les données brutes pour débogage
-                    console.log("Affaires reçues:", affaires);
-
-                    // Vérifier la structure des données
-                    const sample = affaires[0];
-                    const columns = Object.keys(sample || {});
-
-                    container.innerHTML = `
-                        <div class="fr-table fr-table--layout-fixed">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        ${columns.map(col => `<th>${col}</th>`).join('')}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${affaires.map(affaire => `
-                                        <tr>
-                                            ${columns.map(col => {
-                                                const value = affaire[col];
-                                                if (col.toLowerCase().includes('date') && value) {
-                                                    try {
-                                                        return `<td>${new Date(value).toLocaleDateString('fr-FR')}</td>`;
-                                                    } catch {
-                                                        return `<td>${value}</td>`;
-                                                    }
-                                                }
-                                                if (col.toLowerCase().includes('etat') || col.toLowerCase().includes('statut')) {
-                                                    return `<td><span class="fr-badge fr-badge--sm ${getBadgeClass(value)}">${value}</span></td>`;
-                                                }
-                                                return `<td>${value || 'N/A'}</td>`;
-                                            }).join('')}
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-
-                // Fonction pour déterminer la classe du badge
-                function getBadgeClass(status) {
-                    if (!status) return "fr-badge--info";
-
-                    const classes = {
-                        "pré-enregistrée": "fr-badge--info",
-                        "en instruction": "fr-badge--warning",
-                        "clôturée": "fr-badge--success",
-                        "annulée": "fr-badge--error"
-                    };
-
-                    return classes[status.toLowerCase()] || "fr-badge--info";
-                }
-
-                // Fonction pour afficher les erreurs
-                function showError(message) {
-                    document.getElementById('affaires-container').innerHTML = `
-                        <div class="fr-callout fr-callout--error">
-                            <h3 class="fr-callout__title">Erreur</h3>
-                            <p class="fr-callout__text">${message}</p>
-                        </div>
-                    `;
-                }
-
-                // Charger les données initiales
-                updateAffaires();
-
-            } catch (error) {
-                console.error("Erreur d'initialisation:", error);
-                document.getElementById('affaires-container').innerHTML = `
-                    <div class="fr-callout fr-callout--error">
-                        <h3 class="fr-callout__title">Erreur d'initialisation</h3>
-                        <p class="fr-callout__text">Impossible d'initialiser l'application: ${error.message}</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Démarrer l'application quand la page est chargée
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+    <!-- Nos scripts -->
+    <script src="scripts/grist-api.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/affaires.js"></script>
 </body>
 </html>
