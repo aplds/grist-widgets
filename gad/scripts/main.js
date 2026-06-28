@@ -3,28 +3,10 @@
  */
 
 // Initialisation de l'application
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        // Initialiser le DSFR
-        if (window.dsfr) {
-            window.dsfr.start();
-        }
-
-        // Initialiser l'API Grist
-        const gristReady = await initGristAPI();
-
-        if (!gristReady) {
-            throw new Error("Impossible d'initialiser l'API Grist");
-        }
-
-        // Initialiser la navigation
-        setupNavigation();
-
-        // Charger la page par défaut
-        loadPage('home');
-    } catch (error) {
-        console.error("Erreur d'initialisation:", error);
-        showError(`Impossible d'initialiser l'application: ${error.message}`);
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser le DSFR
+    if (window.dsfr) {
+        window.dsfr.start();
     }
 });
 
