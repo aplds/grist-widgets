@@ -26,22 +26,35 @@
     table-layout: fixed;
 }
 
-/* Badges */
-.fr-badge {
+.fr-table th,
+.fr-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.fr-table th {
+    font-weight: bold;
+    position: relative;
+}
+
+.sort-icon {
+    margin-left: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Badges d'état */
+.etat-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
     font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
 }
 
-/* Espacement */
-.fr-py-4w {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-/* Conteneur des affaires */
-#affaires-container {
-    min-height: 300px;
+/* Pagination */
+#paginationInfo {
+    line-height: 2.5rem;
 }
 
 /* Responsive */
@@ -52,5 +65,11 @@
 
     .custom-institut-logo {
         height: 3rem;
+    }
+
+    .fr-table th,
+    .fr-table td {
+        padding: 8px;
+        font-size: 0.8rem;
     }
 }
