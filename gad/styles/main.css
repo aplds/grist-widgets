@@ -1,13 +1,10 @@
-/* Styles complémentaires pour le widget Grist */
-
-/* Pleine largeur */
+/* Styles pour le widget Grist */
 .fr-container {
     width: 100%;
     max-width: none;
     padding: 0 1.5rem;
 }
 
-/* Correction des logos */
 .custom-institut-logo {
     height: 4rem;
     width: auto;
@@ -15,33 +12,18 @@
     margin-left: 1rem;
 }
 
-/* Tableaux */
 .fr-table {
     width: 100%;
     margin: 1.5rem 0;
 }
 
-.fr-table table {
-    width: 100%;
-    table-layout: fixed;
-}
-
-.fr-table th,
-.fr-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-/* Badges d'état */
 .etat-badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
     font-size: 0.8rem;
+    display: inline-block;
 }
 
-/* Conteneur des affaires */
 #affaires-container {
     min-height: 300px;
 }
