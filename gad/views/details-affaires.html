@@ -1,0 +1,63 @@
+<div id="affaire-details">
+    <button class="fr-btn fr-btn--secondary fr-mb-3w" id="back-button">Retour à la liste</button>
+    <h1 id="affaire-nom"></h1>
+    <p id="affaire-description"></p>
+
+    <!-- Onglets pour les sous-sections -->
+    <div class="fr-tabs">
+        <ul class="fr-tabs__list" role="tablist" aria-label="Sections de l'affaire">
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-membres" tabindex="-1" role="tab" aria-selected="false">Membres</button>
+            </li>
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-courriers" tabindex="-1" role="tab" aria-selected="false">Courriers</button>
+            </li>
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-decisions" tabindex="-1" role="tab" aria-selected="false">Décisions</button>
+            </li>
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-rapports" tabindex="-1" role="tab" aria-selected="false">Rapports d'instruction</button>
+            </li>
+            <li role="presentation">
+                <button class="fr-tabs__tab" id="tab-jugements" tabindex="-1" role="tab" aria-selected="false">Jugements</button>
+            </li>
+        </ul>
+        <div id="tab-membres-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-membres">
+            <!-- Contenu des membres -->
+        </div>
+        <div id="tab-courriers-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-courriers">
+            <!-- Contenu des courriers -->
+        </div>
+        <div id="tab-decisions-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-decisions">
+            <!-- Contenu des décisions -->
+        </div>
+        <div id="tab-rapports-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-rapports">
+            <!-- Contenu des rapports -->
+        </div>
+        <div id="tab-jugements-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tab-jugements">
+            <!-- Contenu des jugements -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logique pour gérer les onglets
+    document.querySelectorAll('.fr-tabs__tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.fr-tabs__tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+            document.querySelectorAll('.fr-tabs__panel').forEach(p => p.hidden = true);
+
+            tab.setAttribute('aria-selected', 'true');
+            const panelId = tab.id.replace('tab-', '') + '-panel';
+            document.getElementById(panelId).hidden = false;
+        });
+    });
+
+    // Activation du premier onglet par défaut
+    document.getElementById('tab-membres').click();
+
+    // Gestion du bouton de retour
+    document.getElementById('back-button').addEventListener('click', () => {
+        loadView('affaires');
+    });
+</script>
