@@ -78,10 +78,3 @@ function getAffaireById(id) {
 
 // Initialisation
 grist.ready().then(loadAffairesTable);
-
-// Dans grist-api.js
-affairesData = [
-  { id: 1, Numero: "AFF-001", Etat: "En cours", École: "École A", "Mis en cause": "Jean Dupont" },
-  { id: 2, Numero: "AFF-002", Etat: "Terminée", École: "École B", "Mis en cause": "Marie Martin" }
-];
-isDataLoaded = true;
