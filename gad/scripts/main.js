@@ -4,11 +4,6 @@
 
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialisation du DSFR
-    if (window.dsfr) {
-        window.dsfr.start();
-    }
-
     // Configuration de la navigation
     setupNavigation();
 
