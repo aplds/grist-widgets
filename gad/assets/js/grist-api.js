@@ -31,35 +31,48 @@ const etatColors = {
 // Écouteur pour les enregistrements des tables
 grist.onRecords(function(table) {
   try {
-    console.log(`Table reçue : ${table.name}, Nombre d'enregistrements : ${table.records.length}`);
+    console.log(`Table reçue : ${table.name}`);
+
+    // Vérifiez que table.records est défini et est un tableau
+    if (!table || !table.records) {
+      console.warn(`La table ${table ? table.name : 'inconnue'} ne contient pas de propriété "records".`);
+      return;
+    }
+
+    if (!Array.isArray(table.records)) {
+      console.warn(`La propriété "records" de la table ${table.name} n'est pas un tableau.`);
+      return;
+    }
+
+    console.log(`Nombre d'enregistrements : ${table.records.length}`);
 
     switch (table.name) {
       case "Affaires":
-        affairesData = table.records;
+        affairesData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Parties":
-        partiesData = table.records;
+        partiesData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Membres":
-        membresData = table.records;
+        membresData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Audiences":
-        audiencesData = table.records;
+        audiencesData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Retroplanning":
-        retroplanningData = table.records;
+        retroplanningData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Role":
-        rolesData = table.records;
+        rolesData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Onglets":
-        ongletsData = table.records;
+        ongletsData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Observateurs":
-        observateursData = table.records;
+        observateursData = Array.isArray(table.records) ? table.records : [];
         break;
       case "Ecoles":
-        ecolesData = table.records;
+        ecolesData = Array.isArray(table.records) ? table.records : [];
         break;
     }
 
