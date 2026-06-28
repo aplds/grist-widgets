@@ -1,38 +1,48 @@
-/* Styles de base */
-:root {
-    --primary-color: #000091;
-    --secondary-color: #f5f5fe;
-    --text-color: #1e1e1e;
-    --light-gray: #e5e5e5;
-    --border-color: #ddd;
-    --radius: 4px;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+/* Styles complémentaires au DSFR pour pleine largeur et qualité des images */
 
-/* Conteneur principal */
+/* Pleine largeur pour tous les conteneurs */
 .fr-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
+    width: 100%;
+    max-width: none;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Navigation active */
-.fr-nav__link.active {
-    color: var(--primary-color);
-    font-weight: bold;
-    border-bottom: 2px solid var(--primary-color);
+/* Correction des logos */
+.fr-header__logo {
+    display: flex;
+    align-items: center;
 }
 
-/* Tableaux */
+.fr-header__logo p.fr-logo {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.2;
+}
+
+.custom-institut-logo {
+    height: 4rem;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Tableaux en pleine largeur */
 .fr-table {
+    width: 100%;
     margin: 1.5rem 0;
 }
 
-/* Badges */
+.fr-table table {
+    width: 100%;
+}
+
+/* Badges DSFR */
 .fr-badge {
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
-    border-radius: 12px;
+    border-radius: 0.25rem;
 }
 
 /* Espacement */
@@ -41,45 +51,23 @@
     padding-bottom: 3rem;
 }
 
-/* Boutons personnalisés */
-.action-button {
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-/* Conteneur pour les onglets */
-.tab-container {
-    margin: 2rem 0;
-}
-
-/* Modales */
-.modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
+/* Modales en pleine largeur */
+.fr-modal {
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
 }
 
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: var(--radius);
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow);
+.fr-modal .fr-container {
+    max-width: 1200px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .fr-header__menu-links {
-        display: block;
+    .fr-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .fr-header__operator img {
+        height: 3rem;
     }
 }
