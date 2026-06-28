@@ -10,6 +10,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
     <!-- Nos styles -->
     <link rel="stylesheet" href="styles/main.css">
+    <style>
+        /* Styles pour les logos */
+        .fr-header__operator img {
+            height: 60px !important;
+            margin-left: 1rem;
+        }
+        .fr-logo {
+            font-size: 1.2rem !important;
+        }
+    </style>
 </head>
 <body class="fr-container">
     <!-- En-tête DSFR conforme -->
@@ -27,8 +37,7 @@
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
                                  alt="Institut Agro"
-                                 class="fr-responsive-img"
-                                 style="height: 60px; margin-left: 1rem;">
+                                 class="fr-responsive-img">
                         </div>
                     </div>
                     <div class="fr-header__service">
@@ -90,30 +99,54 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Nos scripts -->
+    <!-- Scripts -->
     <script>
         // Initialisation de l'API Grist pour les widgets
         document.addEventListener('DOMContentLoaded', function() {
-            // L'API Grist est disponible globalement dans les widgets
+            // Dans un widget Grist, l'API est disponible globalement
             window.GristAPI = {
+                /**
+                 * Récupère toutes les lignes d'une table
+                 */
                 fetchTable: function(tableName) {
-                    return gristDoc.docApi.fetchTable(tableName);
+                    return grist.docApi.fetchTable(tableName);
                 },
+
+                /**
+                 * Récupère un enregistrement spécifique
+                 */
                 fetchRecord: function(tableName, recordId) {
-                    return gristDoc.docApi.fetchSelectedRecord(tableName, recordId);
+                    return grist.docApi.fetchSelectedRecord(tableName, recordId);
                 },
+
+                /**
+                 * Récupère les enregistrements liés
+                 */
                 fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
-                    return gristDoc.docApi.fetchTable(tableName, {
+                    return grist.docApi.fetchTable(tableName, {
                         filter: { [foreignKey]: foreignKeyValue }
                     });
                 },
+
+                /**
+                 * Ajoute un nouvel enregistrement
+                 */
                 addRecord: function(tableName, data) {
-                    return gristDoc.docApi.addRecord(tableName, data);
+                    return grist.docApi.addRecord(tableName, data);
                 },
+
+                /**
+                 * Met à jour un enregistrement
+                 */
                 updateRecord: function(tableName, recordId, data) {
-                    return gristDoc.docApi.updateRecord(tableName, recordId, data);
+                    return grist.docApi.updateRecord(tableName, recordId, data);
                 }
             };
+
+            // Initialisation du DSFR
+            if (window.dsfr) {
+                window.dsfr.start();
+            }
         });
     </script>
     <script src="scripts/main.js"></script>
