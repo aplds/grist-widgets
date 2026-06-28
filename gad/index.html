@@ -1,106 +1,94 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestion des Affaires Disciplinaires</title>
-  <!-- DSFR CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/utility/utility.min.css">
-  <!-- Nos styles personnalisés -->
-  <link rel="stylesheet" href="styles/main.css">
-  <!-- Polices Marianne -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/fonts.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Affaires Disciplinaires</title>
+    <!-- Polices Marianne -->
+    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
+    <!-- DSFR CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
+    <!-- Nos styles -->
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body class="fr-container">
-  <!-- En-tête DSFR -->
-  <header role="banner" class="fr-header">
-    <div class="fr-header__body">
-      <div class="fr-container">
-        <div class="fr-header__body-row">
-          <div class="fr-header__brand fr-enlarge-link">
-            <div class="fr-header__brand-top">
-              <div class="fr-header__logo">
-                <p class="fr-logo">
-                  République
-                  <br>Française
-                </p>
-              </div>
-              <div class="fr-header__operator">
-                <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
-                     alt="Institut Agro"
-                     class="fr-responsive-img"
-                     style="height: 40px; margin-left: 1rem;">
-              </div>
+    <!-- En-tête simplifiée -->
+    <header class="fr-header">
+        <div class="fr-header__body">
+            <div class="fr-container">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand">
+                        <div class="fr-header__logo">
+                            <p class="fr-logo">
+                                République
+                                <br>Française
+                            </p>
+                        </div>
+                        <div class="fr-header__operator">
+                            <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
+                                 alt="Institut Agro"
+                                 class="fr-responsive-img"
+                                 style="height: 40px;">
+                        </div>
+                    </div>
+                    <div class="fr-header__service">
+                        <p class="fr-header__service-title">Gestion des affaires disciplinaires</p>
+                    </div>
+                </div>
             </div>
-            <div class="fr-header__service">
-              <a href="/" title="Accueil - Gestion des affaires disciplinaires">
-                <p class="fr-header__service-title">
-                  Gestion des affaires disciplinaires
-                </p>
-              </a>
+        </div>
+        <div class="fr-header__menu fr-modal" id="header-navigation">
+            <div class="fr-container">
+                <button class="fr-btn--close fr-btn" aria-controls="header-navigation">Fermer</button>
+                <div class="fr-header__menu-links">
+                    <ul class="fr-nav__list">
+                        <li class="fr-nav__item">
+                            <a class="fr-nav__link active" href="#" data-page="home" id="nav-home">Accueil</a>
+                        </li>
+                        <li class="fr-nav__item">
+                            <a class="fr-nav__link" href="#" data-page="members" id="nav-members">Membres</a>
+                        </li>
+                        <li class="fr-nav__item">
+                            <a class="fr-nav__link" href="#" data-page="hearings" id="nav-hearings">Audiences</a>
+                        </li>
+                        <li class="fr-nav__item">
+                            <a class="fr-nav__link" href="#" data-page="templates" id="nav-templates">Modèles</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
+    </header>
 
-    <!-- Navigation -->
-    <div class="fr-header__menu fr-modal" id="header-navigation">
-      <div class="fr-container">
-        <button class="fr-btn--close fr-btn" aria-controls="header-navigation">Fermer</button>
-        <div class="fr-header__menu-links">
-          <ul class="fr-nav__list">
-            <li class="fr-nav__item">
-              <a class="fr-nav__link" href="#" data-page="home" id="nav-home">Accueil</a>
-            </li>
-            <li class="fr-nav__item">
-              <a class="fr-nav__link" href="#" data-page="members" id="nav-members">Membres</a>
-            </li>
-            <li class="fr-nav__item">
-              <a class="fr-nav__link" href="#" data-page="hearings" id="nav-hearings">Audiences</a>
-            </li>
-            <li class="fr-nav__item">
-              <a class="fr-nav__link" href="#" data-page="templates" id="nav-templates">Modèles</a>
-            </li>
-          </ul>
+    <!-- Contenu principal -->
+    <main id="app-content" class="fr-container fr-py-6w">
+        <!-- Contenu chargé dynamiquement -->
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="fr-footer">
+        <div class="fr-container">
+            <div class="fr-footer__body">
+                <div class="fr-footer__brand">
+                    <a href="/" title="Retour à l'accueil">
+                        <p class="fr-logo">
+                            République
+                            <br>Française
+                        </p>
+                    </a>
+                </div>
+                <div class="fr-footer__content">
+                    <p class="fr-footer__content-desc">Institut Agro - Application de gestion des affaires disciplinaires</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </header>
+    </footer>
 
-  <!-- Contenu principal -->
-  <main id="app-content" class="fr-container fr-py-6w">
-    <!-- Contenu chargé dynamiquement -->
-  </main>
-
-  <!-- Pied de page DSFR -->
-  <footer class="fr-footer" role="contentinfo">
-    <div class="fr-container">
-      <div class="fr-footer__body">
-        <div class="fr-footer__brand fr-enlarge-link">
-          <a href="/" title="Retour à l'accueil - République Française">
-            <p class="fr-logo">
-              République
-              <br>Française
-            </p>
-          </a>
-        </div>
-        <div class="fr-footer__content">
-          <p class="fr-footer__content-desc">Institut Agro - Application de gestion des affaires disciplinaires</p>
-          <p class="fr-footer__content-copy">Sauf mention contraire, tous les contenus de ce site sont sous <a href="https://github.com/etalab/licence-ouverte/blob/master/LO.md" target="_blank" rel="noopener noreferrer" title="licence ouverte - nouvelle fenêtre">licence ouverte Etalab-2.0</a></p>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Scripts DSFR -->
-  <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-  <!-- Grist API -->
-  <script src="https://cdn.jsdelivr.net/npm/@grist-labs/api@0.4.0/dist/grist-api.js"></script>
-  <!-- Nos scripts -->
-  <script src="scripts/api.js"></script>
-  <script src="scripts/main.js"></script>
-  <script src="scripts/home.js"></script>
+    <!-- Scripts DSFR -->
+    <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
+    <!-- Nos scripts -->
+    <script src="scripts/api.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/home.js"></script>
 </body>
 </html>
