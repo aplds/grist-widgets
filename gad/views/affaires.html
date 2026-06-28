@@ -1,4 +1,65 @@
-<h1>Affaires en cours</h1>
-<div id="affaires-list" class="fr-grid-row fr-grid-row--gutters">
-    <!-- Les affaires seront injectées ici par JavaScript -->
+<div id="affairesContainer" style="font-family: Marianne, Arial, sans-serif; width: 100%;">
+  <!-- Barre de recherche -->
+  <div style="padding: 12px 16px; background-color: #f9f9f9; border-radius: 4px 4px 0 0; border-bottom: 1px solid #e5e5e5;">
+    <input type="text" id="searchInput" placeholder="Rechercher par numéro ou mis en cause..."
+           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: Marianne, Arial, sans-serif;">
+  </div>
+
+  <!-- Filtres -->
+  <div style="padding: 8px 16px; background-color: #f9f9f9; display: flex; gap: 12px; flex-wrap: wrap;">
+    <select id="filterEtat" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      <option value="">Tous les états</option>
+    </select>
+    <select id="filterEcole" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+      <option value="">Toutes les écoles</option>
+    </select>
+  </div>
+
+  <!-- Tableau des affaires -->
+  <div style="overflow-x: auto;">
+    <table id="affairesTable" style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background-color: #f6f6f6;">
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e5e5; font-weight: 600; position: relative;">
+            Numéro
+            <span class="sort-icon" data-column="Numero" style="margin-left: 5px; cursor: pointer;">↕</span>
+          </th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e5e5; font-weight: 600; position: relative;">
+            État
+            <span class="sort-icon" data-column="Etat" style="margin-left: 5px; cursor: pointer;">↕</span>
+          </th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e5e5; font-weight: 600; position: relative;">
+            Date de l'état
+            <span class="sort-icon" data-column="Date" style="margin-left: 5px; cursor: pointer;">↕</span>
+          </th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e5e5; font-weight: 600; position: relative;">
+            École
+            <span class="sort-icon" data-column="Ecole" style="margin-left: 5px; cursor: pointer;">↕</span>
+          </th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e5e5; font-weight: 600; position: relative;">
+            Mis en cause
+            <span class="sort-icon" data-column="Mis en cause" style="margin-left: 5px; cursor: pointer;">↕</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="affairesTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background-color: #f9f9f9; border-radius: 0 0 4px 4px;">
+    <div>
+      <select id="itemsPerPage" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="5">5 par page</option>
+        <option value="10" selected>10 par page</option>
+        <option value="25">25 par page</option>
+        <option value="50">50 par page</option>
+      </select>
+    </div>
+    <div id="paginationInfo" style="font-size: 14px; color: #666;"></div>
+    <div>
+      <button id="prevPage" style="padding: 6px 12px; margin-right: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: white; cursor: pointer;">Précédent</button>
+      <button id="nextPage" style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: white; cursor: pointer;">Suivant</button>
+    </div>
+  </div>
 </div>
