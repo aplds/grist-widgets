@@ -1,67 +1,62 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des affaires disciplinaires</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/affaires.css">
-    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header class="fr-header">
-        <div class="fr-container">
-            <div class="fr-header__body">
-                <div class="fr-header__logo">
-                    <p class="fr-logo">
-                        République
-                        <br>Française
-                    </p>
-                </div>
-                <div class="fr-header__tools">
-                    <div class="fr-header__tools-links">
-                        <ul class="fr-links-group">
-                            <li>
-                                <a class="fr-link" href="membres.html">Gestion des membres</a>
-                            </li>
-                            <li>
-                                <a class="fr-link" href="audiences.html">Gestion des audiences</a>
-                            </li>
-                            <li>
-                                <a class="fr-link" href="modeles.html">Modèles de documents</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+<div class="widget-container">
+    <!-- En-tête avec logo et titre -->
+    <div class="header">
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/2/22/Republique-francaise-logo.svg/500px-Republique-francaise-logo.svg.png" alt="République Française" />
+        </div>
+        <h1>Gestion des affaires disciplinaires</h1>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Rechercher une affaire..." />
+        <button class="fr-btn" id="search-button">Rechercher</button>
+    </div>
+
+    <!-- Tableau des affaires -->
+    <div class="affaires-table">
+        <table id="affaires-list">
+            <thead>
+                <tr>
+                    <th>Mis en cause</th>
+                    <th>École</th>
+                    <th>État</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modale pour les détails d'une affaire -->
+    <div id="affaire-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Détails de l'affaire</h2>
+            <div id="modal-details"></div>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="membres">Membres</button>
+                <button class="tab-button" data-tab="courriers">Courriers</button>
+                <button class="tab-button" data-tab="jugements">Jugements</button>
+                <button class="tab-button" data-tab="rapports">Rapports</button>
+                <button class="tab-button" data-tab="decisions">Décisions</button>
+            </div>
+            <div class="tab-content" id="membres-tab">
+                <!-- Contenu des membres -->
+            </div>
+            <div class="tab-content" id="courriers-tab">
+                <!-- Contenu des courriers -->
+            </div>
+            <div class="tab-content" id="jugements-tab">
+                <!-- Contenu des jugements -->
+            </div>
+            <div class="tab-content" id="rapports-tab">
+                <!-- Contenu des rapports -->
+            </div>
+            <div class="tab-content" id="decisions-tab">
+                <!-- Contenu des décisions -->
             </div>
         </div>
-    </header>
-
-    <main class="fr-container">
-        <h1>Liste des affaires disciplinaires</h1>
-        <div class="fr-search-bar">
-            <input type="text" id="search-input" placeholder="Rechercher une affaire...">
-            <button class="fr-btn" id="search-button">Rechercher</button>
-        </div>
-        <div class="fr-table">
-            <table id="affaires-table">
-                <thead>
-                    <tr>
-                        <th>Mis en cause</th>
-                        <th>École</th>
-                        <th>État</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="affaires-list">
-                    <!-- Les affaires seront chargées dynamiquement ici -->
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-    <script src="scripts/grist-api.js"></script>
-    <script src="scripts/affaires.js"></script>
-</body>
-</html>
+    </div>
+</div>
