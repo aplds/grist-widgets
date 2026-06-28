@@ -4,6 +4,21 @@ grist.ready({
     optionalAccess: ['full']
 });
 
+// Après l'initialisation de l'API Grist
+grist.ready({
+    requiredAccess: 'read table',
+    optionalAccess: ['full']
+});
+
+// Charger explicitement la table "Affaires"
+grist.docApi.fetchTable('Affaires').then(function(table) {
+    affairesData = table;
+    isDataLoaded = true;
+    console.log("Affaires chargées via fetchTable :", affairesData);
+}).catch(function(error) {
+    console.error("Erreur lors du chargement de la table Affaires :", error);
+});
+
 // Données des tables
 let affairesData = [];
 let partiesData = [];
