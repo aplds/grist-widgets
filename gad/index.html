@@ -8,21 +8,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
     <!-- DSFR CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
+    <!-- Utility classes DSFR -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/utility/utility.min.css">
     <!-- Nos styles -->
     <link rel="stylesheet" href="styles/main.css">
     <style>
-        /* Styles pour les logos */
-        .fr-header__operator img {
-            height: 60px !important;
+        /* Styles pour les logos DSFR */
+        .custom-header-logo {
+            height: 6rem;
+            width: auto;
+        }
+        .custom-institut-logo {
+            height: 4rem;
+            width: auto;
             margin-left: 1rem;
         }
-        .fr-logo {
-            font-size: 1.2rem !important;
+        /* Pleine largeur */
+        body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .fr-container {
+            width: 100%;
+            max-width: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
     </style>
 </head>
-<body class="fr-container">
-    <!-- En-tête DSFR conforme -->
+<body>
+    <!-- En-tête DSFR conforme avec logos haute qualité -->
     <header role="banner" class="fr-header">
         <div class="fr-header__body">
             <div class="fr-container">
@@ -37,7 +53,7 @@
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
                                  alt="Institut Agro"
-                                 class="fr-responsive-img">
+                                 class="custom-institut-logo fr-responsive-img">
                         </div>
                     </div>
                     <div class="fr-header__service">
@@ -73,7 +89,7 @@
         </div>
     </header>
 
-    <!-- Contenu principal -->
+    <!-- Contenu principal en pleine largeur -->
     <main id="app-content" class="fr-container fr-py-6w">
         <!-- Contenu chargé dynamiquement -->
     </main>
@@ -99,52 +115,51 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Scripts -->
+    <!-- Initialisation de l'application -->
     <script>
-        // Attendre que Grist soit prêt
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialisation du DSFR
-            if (window.dsfr) {
-                window.dsfr.start();
-            }
-
-            // Fonction pour initialiser l'API Grist quand elle est prête
-            function initGristAPI() {
-                if (typeof grist !== 'undefined' && grist.docApi) {
-                    window.GristAPI = {
-                        fetchTable: function(tableName) {
-                            return grist.docApi.fetchTable(tableName);
-                        },
-                        fetchRecord: function(tableName, recordId) {
-                            return grist.docApi.fetchSelectedRecord(tableName, recordId);
-                        },
-                        fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
-                            return grist.docApi.fetchTable(tableName, {
-                                filter: { [foreignKey]: foreignKeyValue }
-                            });
-                        },
-                        addRecord: function(tableName, data) {
-                            return grist.docApi.addRecord(tableName, data);
-                        },
-                        updateRecord: function(tableName, recordId, data) {
-                            return grist.docApi.updateRecord(tableName, recordId, data);
-                        }
-                    };
-
-                    // L'API est prête, on peut charger la page
-                    setupNavigation();
-                    loadPage('home');
-                } else {
-                    // Réessayer après un court délai
-                    setTimeout(initGristAPI, 100);
+        // Fonction pour initialiser l'application quand Grist est prêt
+        function initApp() {
+            // Vérifier si Grist est disponible
+            if (typeof grist !== 'undefined' && grist.docApi) {
+                // Initialiser le DSFR
+                if (window.dsfr) {
+                    window.dsfr.start();
                 }
+
+                // Créer l'API Grist globale
+                window.GristAPI = {
+                    fetchTable: function(tableName) {
+                        return grist.docApi.fetchTable(tableName);
+                    },
+                    fetchRecord: function(tableName, recordId) {
+                        return grist.docApi.fetchSelectedRecord(tableName, recordId);
+                    },
+                    fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
+                        return grist.docApi.fetchTable(tableName, {
+                            filter: { [foreignKey]: foreignKeyValue }
+                        });
+                    },
+                    addRecord: function(tableName, data) {
+                        return grist.docApi.addRecord(tableName, data);
+                    },
+                    updateRecord: function(tableName, recordId, data) {
+                        return grist.docApi.updateRecord(tableName, recordId, data);
+                    }
+                };
+
+                // Initialiser la navigation
+                setupNavigation();
+                loadPage('home');
+            } else {
+                // Réessayer après un court délai
+                setTimeout(initApp, 100);
             }
+        }
 
-            // Démarrer l'initialisation
-            initGristAPI();
-        });
+        // Démarrer l'initialisation quand la page est chargée
+        document.addEventListener('DOMContentLoaded', initApp);
 
-        // Fonctions globales qui seront définies dans main.js
+        // Déclarations des fonctions globales (seront définies dans main.js)
         function setupNavigation() {}
         function loadPage(page) {}
         function showError(message) {}
@@ -152,7 +167,10 @@
         function escapeHtml(str) {}
         function openModal(title, content, modalId) {}
         function closeModal(modalId) {}
+        function loadHomePage() {}
+        function loadAffairDetail(affairId) {}
     </script>
+    <!-- Nos scripts -->
     <script src="scripts/main.js"></script>
     <script src="scripts/home.js"></script>
 </body>
