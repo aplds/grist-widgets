@@ -3,64 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Affaires Disciplinaires</title>
-    <style>
-        /* Intégration des polices Marianne (DSFR) */
-        @font-face {
-            font-family: 'Marianne';
-            src: url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Regular.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'Marianne';
-            src: url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Bold.woff2') format('woff2');
-            font-weight: bold;
-            font-style: normal;
-        }
-        body {
-            font-family: 'Marianne', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-    </style>
-    <link rel="stylesheet" href="widget.css">
+    <title>Gestion Disciplinaire</title>
+    <!-- Polices Marianne -->
+    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <div class="widget-container">
-        <!-- En-tête -->
-        <header class="widget-header">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
-                 alt="Logo Institut Agro"
-                 class="widget-logo">
-            <div class="widget-header-title">
-                <h1>Gestion des Affaires Disciplinaires</h1>
-                <p class="widget-subtitle">Institut Agro</p>
-            </div>
+                 alt="Institut Agro Logo"
+                 class="header-logo">
+            <h1 class="header-title">Gestion des Affaires Disciplinaires</h1>
         </header>
 
-        <!-- Navigation principale -->
-        <nav class="widget-nav">
-            <button class="widget-nav-button active" data-page="home">Accueil</button>
-            <button class="widget-nav-button" data-page="members">Membres</button>
-            <button class="widget-nav-button" data-page="hearings">Audiences</button>
-            <button class="widget-nav-button" data-page="templates">Modèles</button>
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <button class="nav-button active" data-page="home">Accueil</button>
+            <button class="nav-button" data-page="members">Membres</button>
+            <button class="nav-button" data-page="hearings">Audiences</button>
+            <button class="nav-button" data-page="templates">Modèles</button>
         </nav>
 
-        <!-- Contenu dynamique -->
-        <main class="widget-main" id="widget-content">
-            <!-- Contenu chargé dynamiquement -->
+        <!-- Main Content -->
+        <main class="app-main" id="app-content">
+            <!-- Content loaded dynamically -->
         </main>
 
-        <!-- Pied de page -->
-        <footer class="widget-footer">
-            <p>© Institut Agro - <a href="https://www.institut-agro.fr" target="_blank">Site institutionnel</a></p>
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© Institut Agro - <span id="current-year"></span></p>
         </footer>
     </div>
 
-    <!-- Intégration des outils Grist -->
+    <!-- Grist API -->
     <script src="https://cdn.jsdelivr.net/npm/@grist-labs/api@0.4.0/dist/grist-api.js"></script>
-    <script src="widget.js"></script>
+    <!-- App Scripts -->
+    <script src="scripts/api.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/home.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
