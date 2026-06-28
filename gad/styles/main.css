@@ -20,6 +20,17 @@
     margin: 1.5rem 0;
 }
 
+.fr-table table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.fr-table th,
+.fr-table td {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
 /* Badges */
 .fr-badge {
     font-size: 0.8rem;
@@ -46,5 +57,9 @@
 
     .fr-header__operator img {
         height: 3rem;
+    }
+
+    .fr-table {
+        font-size: 0.8rem;
     }
 }
