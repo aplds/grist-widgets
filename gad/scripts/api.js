@@ -1,33 +1,19 @@
 /**
  * Module d'interaction avec l'API Grist
- * Utilisation correcte de la Grist Plugin API
+ * Utilise l'API globale initialisée dans index.html
  */
-const GristAPI = {
-    /**
-     * Récupère toutes les lignes d'une table
-     * @param {string} tableName - Nom de la table
-     * @returns {Promise<Array>} - Liste des enregistrements
-     */
-    async fetchTable(tableName) {
+const GristAPI = window.GristAPI || {
+    fetchTable: async function(tableName) {
         try {
-            // Utilisation de la méthode correcte de l'API Grist
-            const records = await gristDoc.docApi.fetchTable(tableName);
-            return records || [];
+            return await gristDoc.docApi.fetchTable(tableName);
         } catch (error) {
             console.error(`Erreur lors de la récupération de ${tableName}:`, error);
             throw new Error(`Impossible de charger les données de ${tableName}: ${error.message}`);
         }
     },
 
-    /**
-     * Récupère un enregistrement spécifique
-     * @param {string} tableName - Nom de la table
-     * @param {number} recordId - ID de l'enregistrement
-     * @returns {Promise<Object>} - L'enregistrement
-     */
-    async fetchRecord(tableName, recordId) {
+    fetchRecord: async function(tableName, recordId) {
         try {
-            // Utilisation de fetchSelectedRecord pour un enregistrement spécifique
             return await gristDoc.docApi.fetchSelectedRecord(tableName, recordId);
         } catch (error) {
             console.error(`Erreur lors de la récupération de ${tableName}#${recordId}:`, error);
@@ -35,16 +21,8 @@ const GristAPI = {
         }
     },
 
-    /**
-     * Récupère les enregistrements liés via une table de jointure
-     * @param {string} tableName - Nom de la table
-     * @param {string} foreignKey - Clé étrangère
-     * @param {number} foreignKeyValue - Valeur de la clé étrangère
-     * @returns {Promise<Array>} - Liste des enregistrements liés
-     */
-    async fetchRelatedRecords(tableName, foreignKey, foreignKeyValue) {
+    fetchRelatedRecords: async function(tableName, foreignKey, foreignKeyValue) {
         try {
-            // Utilisation de fetchTable avec un filtre
             return await gristDoc.docApi.fetchTable(tableName, {
                 filter: { [foreignKey]: foreignKeyValue }
             });
@@ -54,13 +32,7 @@ const GristAPI = {
         }
     },
 
-    /**
-     * Ajoute un nouvel enregistrement
-     * @param {string} tableName - Nom de la table
-     * @param {Object} data - Données à ajouter
-     * @returns {Promise<Object>} - L'enregistrement créé
-     */
-    async addRecord(tableName, data) {
+    addRecord: async function(tableName, data) {
         try {
             return await gristDoc.docApi.addRecord(tableName, data);
         } catch (error) {
@@ -69,14 +41,7 @@ const GristAPI = {
         }
     },
 
-    /**
-     * Met à jour un enregistrement
-     * @param {string} tableName - Nom de la table
-     * @param {number} recordId - ID de l'enregistrement
-     * @param {Object} data - Données à mettre à jour
-     * @returns {Promise<Object>} - L'enregistrement mis à jour
-     */
-    async updateRecord(tableName, recordId, data) {
+    updateRecord: async function(tableName, recordId, data) {
         try {
             return await gristDoc.docApi.updateRecord(tableName, recordId, data);
         } catch (error) {
