@@ -11,7 +11,7 @@
     <!-- Nos styles -->
     <link rel="stylesheet" href="styles/main.css">
 </head>
-<body>
+<body class="fr-container">
     <!-- En-tête DSFR conforme -->
     <header role="banner" class="fr-header">
         <div class="fr-header__body">
@@ -70,7 +70,7 @@
     </main>
 
     <!-- Pied de page -->
-    <footer class="fr-footer" role="contentinfo">
+    <footer class="fr-footer">
         <div class="fr-container">
             <div class="fr-footer__body">
                 <div class="fr-footer__brand fr-enlarge-link">
@@ -90,15 +90,32 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Grist API -->
+    <!-- Nos scripts -->
     <script>
-        // Initialisation de l'API Grist
+        // Initialisation de l'API Grist pour les widgets
         document.addEventListener('DOMContentLoaded', function() {
-            window.gristDoc = window.grist.docApi;
+            // L'API Grist est disponible globalement dans les widgets
+            window.GristAPI = {
+                fetchTable: function(tableName) {
+                    return gristDoc.docApi.fetchTable(tableName);
+                },
+                fetchRecord: function(tableName, recordId) {
+                    return gristDoc.docApi.fetchSelectedRecord(tableName, recordId);
+                },
+                fetchRelatedRecords: function(tableName, foreignKey, foreignKeyValue) {
+                    return gristDoc.docApi.fetchTable(tableName, {
+                        filter: { [foreignKey]: foreignKeyValue }
+                    });
+                },
+                addRecord: function(tableName, data) {
+                    return gristDoc.docApi.addRecord(tableName, data);
+                },
+                updateRecord: function(tableName, recordId, data) {
+                    return gristDoc.docApi.updateRecord(tableName, recordId, data);
+                }
+            };
         });
     </script>
-    <!-- Nos scripts -->
-    <script src="scripts/api.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/home.js"></script>
 </body>
