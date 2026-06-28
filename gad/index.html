@@ -13,17 +13,13 @@
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <!-- En-tête DSFR conforme -->
     <header role="banner" class="fr-header">
         <div class="fr-header__body">
             <div class="fr-container">
                 <div class="fr-header__body-row">
                     <div class="fr-header__brand fr-enlarge-link">
                         <div class="fr-header__logo">
-                            <p class="fr-logo" title="République française">
-                                République
-                                <br>française
-                            </p>
+                            <p class="fr-logo">République<br>française</p>
                         </div>
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
@@ -32,45 +28,28 @@
                         </div>
                     </div>
                     <div class="fr-header__service">
-                        <a href="/" title="Accueil - Gestion des affaires disciplinaires">
-                            <p class="fr-header__service-title">
-                                Gestion des affaires disciplinaires
-                            </p>
-                        </a>
+                        <p class="fr-header__service-title">Gestion des affaires disciplinaires</p>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Contenu principal -->
-    <main id="app-content" class="fr-container fr-py-4w">
-        <div class="fr-grid-row fr-grid-row--gutters">
-            <div class="fr-col-12">
-                <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
-                <div id="affaires-container">
-                    <div class="fr-callout fr-callout--info">
-                        Chargement en cours...
-                    </div>
-                </div>
-            </div>
+    <main class="fr-container fr-py-4w">
+        <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
+        <div id="affaires-container" class="fr-callout fr-callout--info">
+            Chargement en cours...
         </div>
     </main>
 
-    <!-- Pied de page -->
     <footer class="fr-footer">
         <div class="fr-container">
             <div class="fr-footer__body">
                 <div class="fr-footer__brand fr-enlarge-link">
-                    <a href="/" title="Retour à l'accueil">
-                        <p class="fr-logo">
-                            République
-                            <br>française
-                        </p>
-                    </a>
+                    <p class="fr-logo">République<br>française</p>
                 </div>
                 <div class="fr-footer__content">
-                    <p class="fr-footer__content-desc">Institut Agro - Application de gestion des affaires disciplinaires</p>
+                    <p class="fr-footer__content-desc">Institut Agro</p>
                 </div>
             </div>
         </div>
@@ -78,7 +57,7 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Notre script principal -->
+    <!-- Notre script -->
     <script src="scripts/main.js"></script>
 </body>
 </html>
