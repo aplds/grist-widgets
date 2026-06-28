@@ -1,30 +1,38 @@
 /**
  * Module principal de l'application
+ * Gère la navigation et les utilitaires
  */
+
+// Initialisation de l'application
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialisation
-    initApp();
+  // Initialisation du DSFR
+  window.dsfr.start();
+
+  // Configuration de la navigation
+  setupNavigation();
+
+  // Chargement de la page par défaut
+  loadPage('home');
 });
 
 /**
- * Initialise l'application
+ * Configure la navigation
  */
-function initApp() {
-    // Chargement de la page d'accueil par défaut
-    loadPage('home');
+function setupNavigation() {
+  // Gestion des liens de navigation
+  document.querySelectorAll('.fr-nav__link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
 
-    // Configuration des boutons de navigation
-    document.querySelectorAll('.nav-button').forEach(button => {
-        button.addEventListener('click', () => {
-            // Mise à jour de l'état actif
-            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
+      // Mise à jour de l'état actif
+      document.querySelectorAll('.fr-nav__link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
 
-            // Chargement de la page
-            const page = button.getAttribute('data-page');
-            loadPage(page);
-        });
+      // Chargement de la page
+      const page = link.getAttribute('data-page');
+      loadPage(page);
     });
+  });
 }
 
 /**
@@ -32,25 +40,45 @@ function initApp() {
  * @param {string} page - Nom de la page à charger
  */
 function loadPage(page) {
-    const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = '<div class="loading">Chargement en cours...</div>';
+  const contentElement = document.getElementById('app-content');
+  contentElement.innerHTML = `
+    <div class="fr-grid-row fr-grid-row--center">
+      <div class="fr-col-12">
+        <div class="fr-callout fr-callout--info">
+          <h3 class="fr-callout__title">Chargement en cours...</h3>
+        </div>
+      </div>
+    </div>
+  `;
 
+  // Chargement asynchrone de la page
+  setTimeout(() => {
     switch(page) {
-        case 'home':
-            loadHomePage();
-            break;
-        case 'members':
-            loadMembersPage();
-            break;
-        case 'hearings':
-            loadHearingsPage();
-            break;
-        case 'templates':
-            loadTemplatesPage();
-            break;
-        default:
-            contentElement.innerHTML = '<div class="error">Page non trouvée</div>';
+      case 'home':
+        loadHomePage();
+        break;
+      case 'members':
+        loadMembersPage();
+        break;
+      case 'hearings':
+        loadHearingsPage();
+        break;
+      case 'templates':
+        loadTemplatesPage();
+        break;
+      default:
+        contentElement.innerHTML = `
+          <div class="fr-grid-row fr-grid-row--center">
+            <div class="fr-col-12">
+              <div class="fr-callout fr-callout--error">
+                <h3 class="fr-callout__title">Page non trouvée</h3>
+                <p class="fr-callout__text">La page demandée n'existe pas.</p>
+              </div>
+            </div>
+          </div>
+        `;
     }
+  }, 100);
 }
 
 /**
@@ -58,9 +86,18 @@ function loadPage(page) {
  * @param {string} message - Message d'erreur
  */
 function showError(message) {
-    const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = `<div class="error">${message}</div>`;
-    console.error(message);
+  const contentElement = document.getElementById('app-content');
+  contentElement.innerHTML = `
+    <div class="fr-grid-row fr-grid-row--center">
+      <div class="fr-col-12">
+        <div class="fr-callout fr-callout--error">
+          <h3 class="fr-callout__title">Erreur</h3>
+          <p class="fr-callout__text">${message}</p>
+        </div>
+      </div>
+    </div>
+  `;
+  console.error(message);
 }
 
 /**
@@ -69,18 +106,18 @@ function showError(message) {
  * @returns {string} - Date formatée
  */
 function formatFrenchDate(date) {
-    if (!date) return 'Non spécifiée';
+  if (!date) return 'Non spécifiée';
 
-    try {
-        const d = new Date(date);
-        return d.toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    } catch {
-        return 'Date invalide';
-    }
+  try {
+    const d = new Date(date);
+    return d.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch {
+    return 'Date invalide';
+  }
 }
 
 /**
@@ -89,46 +126,67 @@ function formatFrenchDate(date) {
  * @returns {string} - Chaîne échappée
  */
 function escapeHtml(str) {
-    if (!str) return '';
-    return str.toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /**
- * Ouvre une modale
+ * Ouvre une modale DSFR
  * @param {string} title - Titre de la modale
  * @param {string} content - Contenu HTML de la modale
  * @param {string} modalId - ID de la modale
  */
 function openModal(title, content, modalId = 'app-modal') {
-    // Fermeture des modales existantes
-    closeModal();
+  // Fermeture des modales existantes
+  closeModal();
 
-    // Création de la modale
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.id = modalId;
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2>${title}</h2>
-            ${content}
+  // Création de la modale DSFR
+  const modal = document.createElement('div');
+  modal.id = modalId;
+  modal.className = 'fr-modal';
+  modal.setAttribute('aria-labelledby', `${modalId}-title`);
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  modal.innerHTML = `
+    <div class="fr-container fr-container--fluid fr-container-md">
+      <div class="fr-grid-row fr-grid-row--center">
+        <div class="fr-col-md-8 fr-col-12">
+          <div class="fr-modal__body">
+            <div class="fr-modal__header">
+              <h1 id="${modalId}-title" class="fr-modal__title">
+                <span class="fr-fi-arrow-right-line fr-fi--lg" aria-hidden="true"></span>
+                ${title}
+              </h1>
+            </div>
+            <div class="fr-modal__content">
+              ${content}
+            </div>
+            <div class="fr-modal__footer">
+              <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-lg">
+                <li>
+                  <button class="fr-btn fr-btn--secondary" onclick="closeModal('${modalId}')">
+                    Annuler
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-    `;
+      </div>
+    </div>
+  `;
 
-    document.body.appendChild(modal);
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
 
-    // Ajout d'un bouton de fermeture
-    const closeButton = document.createElement('button');
-    closeButton.className = 'button secondary';
-    closeButton.textContent = 'Fermer';
-    closeButton.addEventListener('click', () => closeModal(modalId));
-
-    const modalContent = modal.querySelector('.modal-content');
-    modalContent.appendChild(closeButton);
+  // Initialisation du composant modal DSFR
+  window.dsfr(modal).modal().init();
 }
 
 /**
@@ -136,6 +194,9 @@ function openModal(title, content, modalId = 'app-modal') {
  * @param {string} modalId - ID de la modale à fermer
  */
 function closeModal(modalId = 'app-modal') {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.remove();
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = '';
+  }
 }
