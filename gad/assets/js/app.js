@@ -34,11 +34,18 @@ async function loadView(viewName) {
 
 // Fonction pour appliquer les filtres et la recherche
 function applyFilters() {
+  if (!Array.isArray(affairesData)) {
+    console.warn("affairesData n'est pas un tableau.");
+    return;
+  }
+
   const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || "";
   const filterEtat = document.getElementById('filterEtat')?.value || "";
   const filterEcole = document.getElementById('filterEcole')?.value || "";
 
   let filtered = affairesData.filter(record => {
+    if (!record) return false;
+
     const numero = (record.Numero || record.numero || record['Numéro'] || record.numAffaire || "").toString().toLowerCase();
     const misEnCause = (record["Mis en cause"] || record.misEnCause || record["Mis_en_cause"] || record.personne || "").toString().toLowerCase();
     const searchMatch = !searchTerm || numero.includes(searchTerm) || misEnCause.includes(searchTerm);
@@ -63,6 +70,11 @@ function applyFilters() {
 
 // Fonction pour appliquer le tri
 function applySort(records) {
+  if (!Array.isArray(records)) {
+    console.warn("records n'est pas un tableau.");
+    return [];
+  }
+
   if (!sortColumn) {
     // Tri par défaut par date (du plus récent au plus ancien)
     return [...records].sort((a, b) => {
@@ -76,6 +88,8 @@ function applySort(records) {
   }
 
   return [...records].sort((a, b) => {
+    if (!a || !b) return 0;
+
     let valueA, valueB;
 
     // Récupérer les valeurs selon la colonne de tri
@@ -122,7 +136,17 @@ function applySort(records) {
 
 // Fonction pour afficher le tableau des affaires avec pagination
 function renderAffairesTable(records) {
+  if (!Array.isArray(records)) {
+    console.warn("records n'est pas un tableau.");
+    return;
+  }
+
   const tableBody = document.getElementById('affairesTableBody');
+  if (!tableBody) {
+    console.warn("L'élément affairesTableBody n'existe pas.");
+    return;
+  }
+
   tableBody.innerHTML = '';
 
   if (records.length === 0) {
@@ -137,6 +161,8 @@ function renderAffairesTable(records) {
 
   // Afficher les enregistrements de la page actuelle
   pageRecords.forEach(function(record, index) {
+    if (!record) return;
+
     const row = document.createElement('tr');
     row.style.cursor = "pointer";
     row.style.borderBottom = "1px solid #f0f0f0";
@@ -243,11 +269,13 @@ function renderAffairesTable(records) {
 // Fonction pour mettre à jour les infos de pagination
 function updatePaginationInfo(totalRecords) {
   const paginationInfo = document.getElementById('paginationInfo');
-  const totalPages = Math.ceil(totalRecords / itemsPerPage) || 1;
-
-  if (paginationInfo) {
-    paginationInfo.textContent = `Page ${currentPage} sur ${totalPages} | ${totalRecords} affaire(s)`;
+  if (!paginationInfo) {
+    console.warn("L'élément paginationInfo n'existe pas.");
+    return;
   }
+
+  const totalPages = Math.ceil(totalRecords / itemsPerPage) || 1;
+  paginationInfo.textContent = `Page ${currentPage} sur ${totalPages} | ${totalRecords} affaire(s)`;
 
   // Désactiver les boutons si nécessaire
   if (document.getElementById('prevPage')) {
@@ -263,102 +291,103 @@ function populateFilters() {
   const filterEtat = document.getElementById('filterEtat');
   const filterEcole = document.getElementById('filterEcole');
 
-  if (filterEtat && filterEcole) {
-    // Récupérer les valeurs uniques pour chaque filtre
-    const etats = [...new Set(affairesData.map(r => r.Etat || r.etat || r['État'] || r.statut || "N/C"))].filter(e => e !== "N/C");
-    const ecoles = [...new Set(affairesData.map(r => r.Ecole || r.ecole || r['École'] || r.nomEcole || "N/C"))].filter(e => e !== "N/C");
-
-    filterEtat.innerHTML = '<option value="">Tous les états</option>';
-    etats.forEach(etat => {
-      const option = document.createElement('option');
-      option.value = etat;
-      option.textContent = etat;
-      filterEtat.appendChild(option);
-    });
-
-    filterEcole.innerHTML = '<option value="">Toutes les écoles</option>';
-    ecoles.forEach(ecole => {
-      const option = document.createElement('option');
-      option.value = ecole;
-      option.textContent = ecole;
-      filterEcole.appendChild(option);
-    });
+  if (!filterEtat || !filterEcole) {
+    console.warn("Les éléments filterEtat ou filterEcole n'existent pas.");
+    return;
   }
+
+  // Récupérer les valeurs uniques pour chaque filtre
+  const etats = [...new Set(affairesData.map(r => r.Etat || r.etat || r['État'] || r.statut || "N/C"))].filter(e => e !== "N/C");
+  const ecoles = [...new Set(affairesData.map(r => r.Ecole || r.ecole || r['École'] || r.nomEcole || "N/C"))].filter(e => e !== "N/C");
+
+  filterEtat.innerHTML = '<option value="">Tous les états</option>';
+  etats.forEach(etat => {
+    const option = document.createElement('option');
+    option.value = etat;
+    option.textContent = etat;
+    filterEtat.appendChild(option);
+  });
+
+  filterEcole.innerHTML = '<option value="">Toutes les écoles</option>';
+  ecoles.forEach(ecole => {
+    const option = document.createElement('option');
+    option.value = ecole;
+    option.textContent = ecole;
+    filterEcole.appendChild(option);
+  });
 }
 
 // Initialisation de la vue principale (affaires)
 function initAffairesView() {
-  // Remplir les filtres
-  populateFilters();
+  checkDataReady(function() {
+    // Remplir les filtres
+    populateFilters();
 
-  // Écouteurs d'événements pour la pagination
-  if (document.getElementById('itemsPerPage')) {
-    document.getElementById('itemsPerPage').addEventListener('change', function() {
-      itemsPerPage = parseInt(this.value);
-      currentPage = 1;
-      applyFilters();
-    });
-  }
-
-  if (document.getElementById('prevPage')) {
-    document.getElementById('prevPage').addEventListener('click', function() {
-      if (currentPage > 1) {
-        currentPage--;
+    // Écouteurs d'événements pour la pagination
+    if (document.getElementById('itemsPerPage')) {
+      document.getElementById('itemsPerPage').addEventListener('change', function() {
+        itemsPerPage = parseInt(this.value);
+        currentPage = 1;
         applyFilters();
-      }
-    });
-  }
-
-  if (document.getElementById('nextPage')) {
-    document.getElementById('nextPage').addEventListener('click', function() {
-      const totalPages = Math.ceil(affairesData.length / itemsPerPage);
-      if (currentPage < totalPages) {
-        currentPage++;
-        applyFilters();
-      }
-    });
-  }
-
-  // Écouteurs d'événements pour les filtres
-  if (document.getElementById('searchInput')) {
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-  }
-  if (document.getElementById('filterEtat')) {
-    document.getElementById('filterEtat').addEventListener('change', applyFilters);
-  }
-  if (document.getElementById('filterEcole')) {
-    document.getElementById('filterEcole').addEventListener('change', applyFilters);
-  }
-
-  // Écouteurs d'événements pour le tri
-  document.querySelectorAll('.sort-icon').forEach(icon => {
-    icon.addEventListener('click', function() {
-      const column = this.getAttribute('data-column');
-
-      // Changer la direction de tri si on clique sur la même colonne
-      if (sortColumn === column) {
-        sortDirection *= -1; // Inverser la direction
-      } else {
-        sortColumn = column;
-        sortDirection = 1; // Réinitialiser à ascendant
-      }
-
-      // Mettre à jour les icônes de tri
-      document.querySelectorAll('.sort-icon').forEach(i => {
-        i.textContent = '↕';
       });
-      if (this.textContent === '↓') {
-        this.textContent = '↑';
-      } else {
-        this.textContent = '↓';
-      }
+    }
 
-      applyFilters(); // Re-appliquer les filtres avec le nouveau tri
+    if (document.getElementById('prevPage')) {
+      document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          applyFilters();
+        }
+      });
+    }
+
+    if (document.getElementById('nextPage')) {
+      document.getElementById('nextPage').addEventListener('click', function() {
+        const totalPages = Math.ceil(affairesData.length / itemsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          applyFilters();
+        }
+      });
+    }
+
+    // Écouteurs d'événements pour les filtres
+    if (document.getElementById('searchInput')) {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+    }
+    if (document.getElementById('filterEtat')) {
+      document.getElementById('filterEtat').addEventListener('change', applyFilters);
+    }
+    if (document.getElementById('filterEcole')) {
+      document.getElementById('filterEcole').addEventListener('change', applyFilters);
+    }
+
+    // Écouteurs d'événements pour le tri
+    document.querySelectorAll('.sort-icon').forEach(icon => {
+      icon.addEventListener('click', function() {
+        const column = this.getAttribute('data-column');
+
+        // Changer la direction de tri si on clique sur la même colonne
+        if (sortColumn === column) {
+          sortDirection *= -1; // Inverser la direction
+        } else {
+          sortColumn = column;
+          sortDirection = 1; // Réinitialiser à ascendant
+        }
+
+        // Mettre à jour les icônes de tri
+        document.querySelectorAll('.sort-icon').forEach(i => {
+          i.textContent = '↕';
+        });
+        this.textContent = sortDirection === 1 ? '↓' : '↑';
+
+        applyFilters(); // Re-appliquer les filtres avec le nouveau tri
+      });
     });
-  });
 
-  // Appliquer les filtres initiaux
-  applyFilters();
+    // Appliquer les filtres initiaux
+    applyFilters();
+  });
 }
 
 // Initialisation de la vue "détails d'une affaire"
@@ -417,9 +446,18 @@ function initDetailsAffaireView() {
 
 // Initialisation de la vue "Audiences"
 function initAudiencesView() {
-  const audiencesList = document.getElementById('audiences-list');
+  if (!Array.isArray(audiencesData)) {
+    console.warn("audiencesData n'est pas un tableau.");
+    return;
+  }
 
-  if (!audiencesData || audiencesData.length === 0) {
+  const audiencesList = document.getElementById('audiences-list');
+  if (!audiencesList) {
+    console.warn("L'élément audiencesList n'existe pas.");
+    return;
+  }
+
+  if (audiencesData.length === 0) {
     audiencesList.innerHTML = "<p>Aucune audience trouvée.</p>";
     return;
   }
@@ -438,9 +476,18 @@ function initAudiencesView() {
 
 // Initialisation de la vue "Membres"
 function initMembresView() {
-  const membresList = document.getElementById('membres-list');
+  if (!Array.isArray(membresData)) {
+    console.warn("membresData n'est pas un tableau.");
+    return;
+  }
 
-  if (!membresData || membresData.length === 0) {
+  const membresList = document.getElementById('membres-list');
+  if (!membresList) {
+    console.warn("L'élément membresList n'existe pas.");
+    return;
+  }
+
+  if (membresData.length === 0) {
     membresList.innerHTML = "<p>Aucun membre trouvé.</p>";
     return;
   }
