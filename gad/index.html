@@ -41,18 +41,6 @@
                 </div>
             </div>
         </div>
-        <div class="fr-header__menu fr-modal" id="header-navigation">
-            <div class="fr-container">
-                <button class="fr-btn--close fr-btn" aria-controls="header-navigation">Fermer</button>
-                <div class="fr-header__menu-links">
-                    <ul class="fr-nav__list">
-                        <li class="fr-nav__item">
-                            <a class="fr-nav__link active" href="#" data-page="home" id="nav-home">Accueil</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
     </header>
 
     <!-- Contenu principal -->
@@ -61,7 +49,9 @@
             <div class="fr-col-12">
                 <h1 class="fr-h3">Liste des affaires disciplinaires</h1>
                 <div id="affaires-container">
-                    <!-- Le contenu sera chargé ici -->
+                    <div class="fr-callout fr-callout--info">
+                        Chargement des affaires en cours...
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,99 +78,80 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
-    <!-- Script principal -->
+    <!-- Script principal avec initialisation Grist -->
     <script>
-        // Attendre que Grist soit prêt
         document.addEventListener('DOMContentLoaded', function() {
             // Initialiser le DSFR
             if (window.dsfr) {
                 window.dsfr.start();
             }
 
-            // Fonction pour charger les affaires
-            async function loadAffaires() {
-                try {
-                    const container = document.getElementById('affaires-container');
-                    container.innerHTML = '<div class="fr-callout fr-callout--info">Chargement en cours...</div>';
+            // Initialisation de l'API Grist pour les widgets
+            grist.ready({
+                requiredAccess: 'read table'
+            });
 
-                    // Dans un widget Grist, on utilise fetchSelectedTable pour la table active
-                    const affaires = await grist.docApi.fetchSelectedTable();
+            // Variable pour stocker les affaires
+            let affaires = [];
 
-                    if (!affaires || affaires.length === 0) {
-                        container.innerHTML = `
-                            <div class="fr-callout fr-callout--info">
-                                <h3 class="fr-callout__title">Aucune affaire trouvée</h3>
-                                <p class="fr-callout__text">Il n'y a actuellement aucune affaire enregistrée.</p>
-                            </div>
-                        `;
-                        return;
-                    }
+            // Écouteur pour les changements de sélection
+            grist.on('record', function(record) {
+                console.log("Record reçu:", record);
+            });
 
-                    renderAffairesTable(affaires);
-                } catch (error) {
-                    console.error("Erreur lors du chargement des affaires:", error);
-                    document.getElementById('affaires-container').innerHTML = `
-                        <div class="fr-callout fr-callout--error">
-                            <h3 class="fr-callout__title">Erreur de chargement</h3>
-                            <p class="fr-callout__text">Impossible de charger les affaires: ${error.message}</p>
-                        </div>
-                    `;
+            // Écouteur pour les changements de table
+            grist.on('message', function(msg) {
+                if (msg.type === 'table') {
+                    affaires = msg.selectedTable;
+                    renderAffaires();
                 }
-            }
+            });
 
-            // Fonction pour afficher le tableau des affaires
-            function renderAffairesTable(affaires) {
+            // Fonction pour afficher les affaires
+            function renderAffaires() {
                 const container = document.getElementById('affaires-container');
 
-                // Vérifier la structure des données
-                console.log("Données reçues:", affaires);
-
-                // Vérifier si les affaires ont des propriétés attendues
-                const hasExpectedStructure = affaires.length > 0 &&
-                    (affaires[0].id || affaires[0].Mis_en_cause || affaires[0].Ecole);
-
-                if (!hasExpectedStructure) {
+                if (!affaires || affaires.length === 0) {
                     container.innerHTML = `
-                        <div class="fr-callout fr-callout--warning">
-                            <h3 class="fr-callout__title">Structure de données inattendue</h3>
-                            <p class="fr-callout__text">Les données ne correspondent pas à la structure attendue.</p>
-                            <pre>${JSON.stringify(affaires.slice(0, 2), null, 2)}</pre>
+                        <div class="fr-callout fr-callout--info">
+                            <h3 class="fr-callout__title">Aucune affaire trouvée</h3>
+                            <p class="fr-callout__text">Il n'y a actuellement aucune affaire enregistrée.</p>
                         </div>
                     `;
                     return;
                 }
+
+                // Afficher les données brutes pour débogage
+                console.log("Affaires reçues:", affaires);
+
+                // Vérifier la structure des données
+                const sample = affaires[0];
+                const columns = Object.keys(sample || {});
 
                 container.innerHTML = `
                     <div class="fr-table fr-table--layout-fixed">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Mis en cause</th>
-                                    <th>École</th>
-                                    <th>État</th>
-                                    <th>Date</th>
+                                    ${columns.map(col => `<th>${col}</th>`).join('')}
                                 </tr>
                             </thead>
                             <tbody>
-                                ${affaires.map(affaire => {
-                                    // Gestion des données manquantes
-                                    const id = affaire.id || affaire.Id || 'N/A';
-                                    const misEnCause = affaire.Mis_en_cause || affaire['Mis en cause'] || 'Non spécifié';
-                                    const ecole = affaire.Ecole || affaire.École || 'Non spécifiée';
-                                    const etat = affaire.Etat || affaire.État || 'Non spécifié';
-                                    const date = affaire.Date_etat ? new Date(affaire.Date_etat).toLocaleDateString('fr-FR') : 'Non spécifiée';
-
-                                    return `
-                                        <tr>
-                                            <td>${id}</td>
-                                            <td>${misEnCause}</td>
-                                            <td>${ecole}</td>
-                                            <td><span class="fr-badge fr-badge--sm ${getBadgeClass(etat)}">${etat}</span></td>
-                                            <td>${date}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
+                                ${affaires.map(affaire => `
+                                    <tr>
+                                        ${columns.map(col => {
+                                            const value = affaire[col];
+                                            if (col.toLowerCase().includes('date') && value) {
+                                                try {
+                                                    return `<td>${new Date(value).toLocaleDateString('fr-FR')}</td>`;
+                                                } catch {
+                                                    return `<td>${value}</td>`;
+                                                }
+                                            }
+                                            return `<td>${value || 'N/A'}</td>`;
+                                        }).join('')}
+                                    </tr>
+                                `).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -189,17 +160,31 @@
 
             // Fonction pour déterminer la classe du badge
             function getBadgeClass(status) {
+                if (!status) return "fr-badge--info";
+
                 const classes = {
-                    "Pré-enregistrée": "fr-badge--info",
-                    "En instruction": "fr-badge--warning",
-                    "Clôturée": "fr-badge--success",
-                    "Annulée": "fr-badge--error"
+                    "pré-enregistrée": "fr-badge--info",
+                    "en instruction": "fr-badge--warning",
+                    "clôturée": "fr-badge--success",
+                    "annulée": "fr-badge--error"
                 };
-                return classes[status] || "fr-badge--info";
+
+                return classes[status.toLowerCase()] || "fr-badge--info";
             }
 
-            // Charger les affaires au démarrage
-            loadAffaires();
+            // Charger les données initiales
+            grist.docApi.fetchSelectedTable().then(function(data) {
+                affaires = data;
+                renderAffaires();
+            }).catch(function(error) {
+                console.error("Erreur lors du chargement initial:", error);
+                document.getElementById('affaires-container').innerHTML = `
+                    <div class="fr-callout fr-callout--error">
+                        <h3 class="fr-callout__title">Erreur de chargement</h3>
+                        <p class="fr-callout__text">Impossible de charger les affaires: ${error.message}</p>
+                    </div>
+                `;
+            });
         });
     </script>
 </body>
