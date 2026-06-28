@@ -14,6 +14,18 @@ let ecolesData = [];
 
 // Écouteur pour les enregistrements des tables
 grist.onRecords(function(table) {
+    console.log("Table reçue :", table.name); // Log pour vérifier le nom de la table
+    console.log("Enregistrements :", table.records); // Log pour vérifier les enregistrements
+
+    if (table.name === "Affaires") {
+        affairesData = table.records;
+        console.log("Affaires chargées :", affairesData); // Log pour vérifier les affaires
+    }
+    // Ajoutez des logs similaires pour les autres tables si nécessaire
+});
+
+// Écouteur pour les enregistrements des tables
+grist.onRecords(function(table) {
     switch (table.name) {
         case "Affaires":
             affairesData = table.records;
