@@ -1,128 +1,204 @@
 /**
- * Module principal de l'application
+ * Solution finale pour un widget Grist hébergé sur GitHub Pages
  */
 
-// Initialisation de l'application
+// Attendre que le DOM soit chargé
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser le DSFR
     if (window.dsfr) {
         window.dsfr.start();
     }
-});
 
-/**
- * Configure la navigation
- */
-function setupNavigation() {
-    document.querySelectorAll('.fr-nav__link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            // Mise à jour de l'état actif
-            document.querySelectorAll('.fr-nav__link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-
-            // Chargement de la page
-            const page = link.getAttribute('data-page');
-            loadPage(page);
-        });
-    });
-}
-
-/**
- * Charge une page spécifique
- * @param {string} page - Nom de la page à charger
- */
-function loadPage(page) {
-    const contentElement = document.getElementById('app-content');
-
-    switch(page) {
-        case 'home':
-            loadAffairesPage();
-            break;
-        default:
-            contentElement.innerHTML = `
-                <div class="fr-grid-row fr-grid-row--center">
-                    <div class="fr-col-12">
-                        <div class="fr-callout fr-callout--error">
-                            <h3 class="fr-callout__title">Page non trouvée</h3>
-                            <p class="fr-callout__text">La page demandée n'existe pas.</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+    // Fonction pour vérifier si nous sommes dans un widget Grist
+    function isInGristWidget() {
+        return typeof window !== 'undefined' &&
+               (window.location.href.includes('grist.numerique.gouv.fr') ||
+                window.location.href.includes('getgrist.com'));
     }
-}
 
-/**
- * Affiche un message d'erreur
- * @param {string} message - Message d'erreur
- */
-function showError(message) {
-    const contentElement = document.getElementById('affaires-container') ||
-                          document.getElementById('app-content');
-    contentElement.innerHTML = `
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12">
+    // Fonction pour charger les données
+    async function loadData() {
+        const container = document.getElementById('affaires-container');
+
+        try {
+            if (isInGristWidget()) {
+                // Dans un widget Grist, utiliser l'API Grist
+                await initGristAPI();
+            } else {
+                // En développement ou sur GitHub Pages, utiliser des données mock
+                container.innerHTML = `
+                    <div class="fr-callout fr-callout--warning">
+                        <h3 class="fr-callout__title">Mode démonstration</h3>
+                        <p class="fr-callout__text">Ce widget est conçu pour fonctionner dans Grist. Vous voyez actuellement des données d'exemple.</p>
+                    </div>
+                `;
+                renderMockData();
+                return;
+            }
+        } catch (error) {
+            console.error("Erreur d'initialisation:", error);
+            container.innerHTML = `
                 <div class="fr-callout fr-callout--error">
                     <h3 class="fr-callout__title">Erreur</h3>
-                    <p class="fr-callout__text">${message}</p>
+                    <p class="fr-callout__text">Impossible de charger les données: ${error.message}</p>
                 </div>
-            </div>
-        </div>
-    `;
-    console.error(message);
-}
-
-/**
- * Formate une date en français
- * @param {string|Date} date - Date à formater
- * @returns {string} - Date formatée
- */
-function formatFrenchDate(date) {
-    if (!date) return 'Non spécifiée';
-
-    try {
-        const d = new Date(date);
-        return d.toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    } catch {
-        return 'Date invalide';
+            `;
+        }
     }
-}
 
-/**
- * Échappe les caractères HTML
- * @param {string} str - Chaîne à échapper
- * @returns {string} - Chaîne échappée
- */
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+    // Initialisation de l'API Grist
+    async function initGristAPI() {
+        return new Promise((resolve, reject) => {
+            // Vérifier si grist est disponible
+            const checkGrist = setInterval(() => {
+                if (typeof grist !== 'undefined') {
+                    clearInterval(checkGrist);
 
-/**
- * Retourne la classe DSFR pour un badge en fonction de l'état
- * @param {string} status - État de l'affaire
- * @returns {string} - Classe DSFR
- */
-function getBadgeClass(status) {
-    if (!status) return "fr-badge--info";
+                    try {
+                        // Initialiser l'API Grist
+                        grist.ready({
+                            requiredAccess: 'read table'
+                        });
 
-    const classes = {
-        "pré-enregistrée": "fr-badge--info",
-        "en instruction": "fr-badge--warning",
-        "clôturée": "fr-badge--success",
-        "annulée": "fr-badge--error"
-    };
+                        // Écouter les changements de données
+                        grist.onRecords(function(records) {
+                            renderAffaires(records);
+                        });
 
-    return classes[status.toLowerCase()] || "fr-badge--info";
-}
+                        // Charger les données initiales
+                        grist.docApi.fetchSelectedTable()
+                            .then(records => {
+                                renderAffaires(records);
+                                resolve();
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors du chargement initial:", error);
+                                reject(new Error("Impossible de charger les données initiales"));
+                            });
+                    } catch (error) {
+                        console.error("Erreur d'initialisation Grist:", error);
+                        reject(new Error("Impossible d'initialiser l'API Grist"));
+                    }
+                }
+            }, 100);
+
+            // Timeout après 10 secondes
+            setTimeout(() => {
+                clearInterval(checkGrist);
+                reject(new Error("Timeout: l'API Grist n'est pas disponible"));
+            }, 10000);
+        });
+    }
+
+    // Fonction pour afficher les affaires
+    function renderAffaires(records) {
+        const container = document.getElementById('affaires-container');
+
+        if (!records || records.length === 0) {
+            container.innerHTML = `
+                <div class="fr-callout fr-callout--info">
+                    <h3 class="fr-callout__title">Aucune affaire trouvée</h3>
+                    <p class="fr-callout__text">Il n'y a actuellement aucune affaire enregistrée.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Afficher les données brutes pour débogage
+        console.log("Données reçues:", records);
+
+        // Créer le tableau
+        const tableHTML = `
+            <div class="fr-table fr-table--layout-fixed">
+                <table>
+                    <thead>
+                        <tr>
+                            ${getTableHeaders(records).map(header => `<th>${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${records.map(record => `
+                            <tr>
+                                ${getTableHeaders(records).map(header => {
+                                    const value = record[header];
+                                    if (header.toLowerCase().includes('date') && value) {
+                                        try {
+                                            return `<td>${new Date(value).toLocaleDateString('fr-FR')}</td>`;
+                                        } catch {
+                                            return `<td>${value}</td>`;
+                                        }
+                                    }
+                                    if (header.toLowerCase().includes('etat') || header.toLowerCase().includes('statut')) {
+                                        return `<td><span class="etat-badge" style="background: ${getEtatColor(value)}">${value}</span></td>`;
+                                    }
+                                    return `<td>${value || 'N/A'}</td>`;
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = tableHTML;
+    }
+
+    // Fonction pour obtenir les en-têtes du tableau
+    function getTableHeaders(records) {
+        if (!records || records.length === 0) return [];
+
+        // Obtenir les clés du premier enregistrement
+        const firstRecord = records[0];
+        return Object.keys(firstRecord);
+    }
+
+    // Fonction pour obtenir la couleur d'un état
+    function getEtatColor(etat) {
+        const etatColors = {
+            "Pré-enregistrée": "#E1FEDE",
+            "Enregistrée": "#98FD90",
+            "En instruction": "#BC77FC",
+            "En cours d'instruction": "#BC77FC",
+            "Audience": "#FD79F4",
+            "En délibéré": "#FECC81",
+            "Terminée": "#126E0E",
+            "Classé sans suite": "#E00A17",
+            "Procédure R.811-40": "#FEF47A",
+            "Clôturée": "#126E0E"
+        };
+
+        return etatColors[etat] || "#f0f0f0";
+    }
+
+    // Fonction pour afficher des données mock en développement
+    function renderMockData() {
+        const mockData = [
+            {
+                "Numéro": "2023-001",
+                "État": "En instruction",
+                "Date": "2023-05-15",
+                "École": "Montpellier",
+                "Mis en cause": "Jean Dupont"
+            },
+            {
+                "Numéro": "2023-002",
+                "État": "Clôturée",
+                "Date": "2023-04-20",
+                "École": "Rennes",
+                "Mis en cause": "Marie Martin"
+            },
+            {
+                "Numéro": "2023-003",
+                "État": "Pré-enregistrée",
+                "Date": "2023-06-01",
+                "École": "Angers",
+                "Mis en cause": "Pierre Durand"
+            }
+        ];
+
+        renderAffaires(mockData);
+    }
+
+    // Démarrer le chargement des données
+    loadData();
+});
