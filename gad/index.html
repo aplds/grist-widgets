@@ -11,28 +11,32 @@
     <!-- Nos styles -->
     <link rel="stylesheet" href="styles/main.css">
 </head>
-<body class="fr-container">
-    <!-- En-tête simplifiée -->
-    <header class="fr-header">
+<body>
+    <!-- En-tête DSFR conforme -->
+    <header role="banner" class="fr-header">
         <div class="fr-header__body">
             <div class="fr-container">
                 <div class="fr-header__body-row">
-                    <div class="fr-header__brand">
+                    <div class="fr-header__brand fr-enlarge-link">
                         <div class="fr-header__logo">
-                            <p class="fr-logo">
+                            <p class="fr-logo" title="République française">
                                 République
-                                <br>Française
+                                <br>française
                             </p>
                         </div>
                         <div class="fr-header__operator">
                             <img src="https://www.institut-agro.fr/files/fichiers/bibliotheque-de-documents/institutionnel/charte-graphique/logos/logo-institut-agro-couleur-300dpi.png"
                                  alt="Institut Agro"
                                  class="fr-responsive-img"
-                                 style="height: 40px;">
+                                 style="height: 60px; margin-left: 1rem;">
                         </div>
                     </div>
                     <div class="fr-header__service">
-                        <p class="fr-header__service-title">Gestion des affaires disciplinaires</p>
+                        <a href="/" title="Accueil - Gestion des affaires disciplinaires">
+                            <p class="fr-header__service-title">
+                                Gestion des affaires disciplinaires
+                            </p>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -66,14 +70,14 @@
     </main>
 
     <!-- Pied de page -->
-    <footer class="fr-footer">
+    <footer class="fr-footer" role="contentinfo">
         <div class="fr-container">
             <div class="fr-footer__body">
-                <div class="fr-footer__brand">
-                    <a href="/" title="Retour à l'accueil">
+                <div class="fr-footer__brand fr-enlarge-link">
+                    <a href="/" title="Retour à l'accueil - République Française">
                         <p class="fr-logo">
                             République
-                            <br>Française
+                            <br>française
                         </p>
                     </a>
                 </div>
@@ -86,6 +90,13 @@
 
     <!-- Scripts DSFR -->
     <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.js"></script>
+    <!-- Grist API -->
+    <script>
+        // Initialisation de l'API Grist
+        document.addEventListener('DOMContentLoaded', function() {
+            window.gristDoc = window.grist.docApi;
+        });
+    </script>
     <!-- Nos scripts -->
     <script src="scripts/api.js"></script>
     <script src="scripts/main.js"></script>
