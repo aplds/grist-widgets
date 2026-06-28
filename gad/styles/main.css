@@ -1,40 +1,144 @@
-/* Styles pour le widget Grist */
+/* Police Marianne */
+body {
+    font-family: 'Marianne', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* En-tête */
+.fr-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 1rem 0;
+}
+
+.fr-header__body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fr-header__logo {
+    display: flex;
+    align-items: center;
+}
+
+.fr-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000091;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.fr-header__tools-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.fr-links-group {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.fr-link {
+    color: #000091;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.fr-link:hover {
+    text-decoration: underline;
+}
+
+/* Conteneur principal */
 .fr-container {
-    width: 100%;
-    max-width: none;
-    padding: 0 1.5rem;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 0;
 }
 
-.custom-institut-logo {
-    height: 4rem;
-    width: auto;
-    object-fit: contain;
-    margin-left: 1rem;
+/* Titre principal */
+.fr-container h1 {
+    color: #000091;
+    margin-bottom: 1.5rem;
 }
 
+/* Barre de recherche */
+.fr-search-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.fr-search-bar input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    font-family: 'Marianne', Arial, sans-serif;
+}
+
+.fr-search-bar button {
+    padding: 0.5rem 1rem;
+    background-color: #000091;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.fr-search-bar button:hover {
+    background-color: #1a1a7f;
+}
+
+/* Tableau des affaires */
 .fr-table {
     width: 100%;
-    margin: 1.5rem 0;
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.etat-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.8rem;
-    display: inline-block;
+.fr-table table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-#affaires-container {
-    min-height: 300px;
+.fr-table th, .fr-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .fr-container {
-        padding: 0 1rem;
-    }
+.fr-table th {
+    background-color: #000091;
+    color: white;
+}
 
-    .custom-institut-logo {
-        height: 3rem;
-    }
+.fr-table tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* Boutons */
+.fr-btn {
+    padding: 0.5rem 1rem;
+    background-color: #000091;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Marianne', Arial, sans-serif;
+}
+
+.fr-btn:hover {
+    background-color: #1a1a7f;
 }
