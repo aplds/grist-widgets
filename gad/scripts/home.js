@@ -7,12 +7,12 @@ async function loadHomePage() {
     const contentElement = document.getElementById('app-content');
 
     try {
-        // Vérification que l'API Grist est disponible
-        if (!window.gristDoc) {
-            throw new Error("L'API Grist n'est pas disponible");
+        // Vérification que l'API est disponible
+        if (!window.GristAPI) {
+            throw new Error("L'API Grist n'est pas initialisée");
         }
 
-        // Récupération des affaires avec la méthode correcte
+        // Récupération des affaires
         const affairs = await GristAPI.fetchTable('Affaires');
 
         if (!affairs || affairs.length === 0) {
