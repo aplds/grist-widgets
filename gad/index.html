@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des affaires disciplinaires</title>
+    <!-- Lien vers le DSFR (à adapter selon la version) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@latest/dist/dsfr.min.css">
+    <!-- Styles personnalisés -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header role="banner" class="fr-header">
+        <div class="fr-header__body">
+            <div class="fr-container">
+                <div class="fr-header__body-row">
+                    <div class="fr-header__brand fr-enlarge-link">
+                        <div class="fr-header__brand-top">
+                            <div class="fr-header__logo">
+                                <p class="fr-logo">République<br>Française</p>
+                            </div>
+                            <div class="fr-header__operator">
+                                <img src="assets/img/logo-operator.svg" alt="Logo de l'opérateur" class="fr-responsive-img">
+                            </div>
+                        </div>
+                        <div class="fr-header__service">
+                            <p class="fr-header__service-title">Gestion des affaires disciplinaires</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fr-header__menu fr-modal" id="header-modal" aria-labelledby="header-modal-title">
+            <!-- Menu de navigation -->
+            <div class="fr-container">
+                <button class="fr-btn--close fr-btn" aria-controls="header-modal" title="Fermer">Fermer</button>
+                <div class="fr-header__menu-links">
+                    <ul class="fr-btns-group">
+                        <li>
+                            <a class="fr-btn" href="#" data-view="affaires">Affaires en cours</a>
+                        </li>
+                        <li>
+                            <a class="fr-btn" href="#" data-view="audiences">Audiences</a>
+                        </li>
+                        <li>
+                            <a class="fr-btn" href="#" data-view="membres">Membres</a>
+                        </li>
+                        <li>
+                            <a class="fr-btn" href="#" data-view="modeles">Modèles de documents</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main role="main" id="main-content" class="fr-container fr-py-6w">
+        <!-- Contenu dynamique chargé ici -->
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script src="assets/js/grist-api.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
