@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de l'affaire disciplinaire</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/affaires.css">
+    <link href="https://fonts.googleapis.com/css2?family=Marianne:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="fr-header">
+        <div class="fr-container">
+            <div class="fr-header__body">
+                <div class="fr-header__logo">
+                    <p class="fr-logo">
+                        République
+                        <br>Française
+                    </p>
+                </div>
+                <div class="fr-header__tools">
+                    <div class="fr-header__tools-links">
+                        <ul class="fr-links-group">
+                            <li>
+                                <a class="fr-link" href="index.html">Retour à la liste</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="fr-container">
+        <div id="affaire-details">
+            <!-- Les détails de l'affaire seront chargés dynamiquement ici -->
+        </div>
+
+        <div class="fr-tabs">
+            <ul class="fr-tabs__list">
+                <li class="fr-tabs__item">
+                    <button class="fr-tabs__tab" data-tab="membres">Membres</button>
+                </li>
+                <li class="fr-tabs__item">
+                    <button class="fr-tabs__tab" data-tab="courriers">Courriers</button>
+                </li>
+                <li class="fr-tabs__item">
+                    <button class="fr-tabs__tab" data-tab="jugements">Jugements</button>
+                </li>
+                <li class="fr-tabs__item">
+                    <button class="fr-tabs__tab" data-tab="rapports">Rapports</button>
+                </li>
+                <li class="fr-tabs__item">
+                    <button class="fr-tabs__tab" data-tab="decisions">Décisions</button>
+                </li>
+            </ul>
+            <div class="fr-tabs__panels">
+                <div class="fr-tabs__panel" id="membres-panel">
+                    <!-- Contenu des membres -->
+                </div>
+                <div class="fr-tabs__panel" id="courriers-panel">
+                    <!-- Contenu des courriers -->
+                </div>
+                <div class="fr-tabs__panel" id="jugements-panel">
+                    <!-- Contenu des jugements -->
+                </div>
+                <div class="fr-tabs__panel" id="rapports-panel">
+                    <!-- Contenu des rapports -->
+                </div>
+                <div class="fr-tabs__panel" id="decisions-panel">
+                    <!-- Contenu des décisions -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="scripts/grist-api.js"></script>
+    <script src="scripts/affaires.js"></script>
+</body>
+</html>
