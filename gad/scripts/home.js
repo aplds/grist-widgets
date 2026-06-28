@@ -13,7 +13,7 @@ async function loadHomePage() {
         }
 
         // Récupération des affaires
-        const affairs = await GristAPI.fetchTable('Affaires');
+        const affairs = await window.GristAPI.fetchTable('Affaires');
 
         if (!affairs || affairs.length === 0) {
             contentElement.innerHTML = `
