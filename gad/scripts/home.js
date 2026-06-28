@@ -12,8 +12,11 @@ async function loadHomePage() {
             throw new Error("L'API Grist n'est pas initialisée");
         }
 
-        // Récupération des affaires
-        const affairs = await window.GristAPI.fetchTable('Affaires');
+        // Récupération des affaires avec gestion des erreurs
+        const affairs = await window.GristAPI.fetchTable('Affaires').catch(error => {
+            console.error("Erreur détaillée:", error);
+            throw new Error(`Impossible de charger les affaires: ${error.message}`);
+        });
 
         if (!affairs || affairs.length === 0) {
             contentElement.innerHTML = `
