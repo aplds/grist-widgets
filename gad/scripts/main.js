@@ -2,7 +2,7 @@
  * Module principal de l'application
  */
 
-// Initialisation de l'application
+// Initialisation de la navigation
 function setupNavigation() {
     document.querySelectorAll('.fr-nav__link').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -140,29 +140,24 @@ function openModal(title, content, modalId = 'app-modal') {
     modal.setAttribute('aria-modal', 'true');
 
     modal.innerHTML = `
-        <div class="fr-container fr-container--fluid fr-container-md">
-            <div class="fr-grid-row fr-grid-row--center">
-                <div class="fr-col-md-8 fr-col-12">
-                    <div class="fr-modal__body">
-                        <div class="fr-modal__header">
-                            <h1 id="${modalId}-title" class="fr-modal__title">
-                                <span class="fr-fi-arrow-right-line fr-fi--lg" aria-hidden="true"></span>
-                                ${title}
-                            </h1>
-                        </div>
-                        <div class="fr-modal__content">
-                            ${content}
-                        </div>
-                        <div class="fr-modal__footer">
-                            <ul class="fr-btns-group fr-btns-group--right fr-btns-group--inline-lg">
-                                <li>
-                                    <button class="fr-btn fr-btn--secondary" onclick="closeModal('${modalId}')">
-                                        Fermer
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+        <div class="fr-container">
+            <div class="fr-modal__body">
+                <div class="fr-modal__header">
+                    <h1 id="${modalId}-title" class="fr-modal__title">
+                        ${title}
+                    </h1>
+                </div>
+                <div class="fr-modal__content">
+                    ${content}
+                </div>
+                <div class="fr-modal__footer">
+                    <ul class="fr-btns-group fr-btns-group--right">
+                        <li>
+                            <button class="fr-btn fr-btn--secondary" onclick="closeModal('${modalId}')">
+                                Fermer
+                            </button>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
