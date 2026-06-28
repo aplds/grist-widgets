@@ -2,7 +2,35 @@
  * Module principal de l'application
  */
 
-// Initialisation de la navigation
+// Initialisation de l'application
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Initialiser le DSFR
+        if (window.dsfr) {
+            window.dsfr.start();
+        }
+
+        // Initialiser l'API Grist
+        const gristReady = await initGristAPI();
+
+        if (!gristReady) {
+            throw new Error("Impossible d'initialiser l'API Grist");
+        }
+
+        // Initialiser la navigation
+        setupNavigation();
+
+        // Charger la page par défaut
+        loadPage('home');
+    } catch (error) {
+        console.error("Erreur d'initialisation:", error);
+        showError(`Impossible d'initialiser l'application: ${error.message}`);
+    }
+});
+
+/**
+ * Configure la navigation
+ */
 function setupNavigation() {
     document.querySelectorAll('.fr-nav__link').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -25,46 +53,23 @@ function setupNavigation() {
  */
 function loadPage(page) {
     const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = `
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12">
-                <div class="fr-callout fr-callout--info">
-                    <h3 class="fr-callout__title">Chargement en cours...</h3>
-                </div>
-            </div>
-        </div>
-    `;
 
-    // Chargement asynchrone de la page
-    setTimeout(() => {
-        switch(page) {
-            case 'home':
-                if (typeof loadHomePage === 'function') {
-                    loadHomePage();
-                }
-                break;
-            case 'members':
-                loadMembersPage();
-                break;
-            case 'hearings':
-                loadHearingsPage();
-                break;
-            case 'templates':
-                loadTemplatesPage();
-                break;
-            default:
-                contentElement.innerHTML = `
-                    <div class="fr-grid-row fr-grid-row--center">
-                        <div class="fr-col-12">
-                            <div class="fr-callout fr-callout--error">
-                                <h3 class="fr-callout__title">Page non trouvée</h3>
-                                <p class="fr-callout__text">La page demandée n'existe pas.</p>
-                            </div>
+    switch(page) {
+        case 'home':
+            loadAffairesPage();
+            break;
+        default:
+            contentElement.innerHTML = `
+                <div class="fr-grid-row fr-grid-row--center">
+                    <div class="fr-col-12">
+                        <div class="fr-callout fr-callout--error">
+                            <h3 class="fr-callout__title">Page non trouvée</h3>
+                            <p class="fr-callout__text">La page demandée n'existe pas.</p>
                         </div>
                     </div>
-                `;
-        }
-    }, 100);
+                </div>
+            `;
+    }
 }
 
 /**
@@ -72,7 +77,8 @@ function loadPage(page) {
  * @param {string} message - Message d'erreur
  */
 function showError(message) {
-    const contentElement = document.getElementById('app-content');
+    const contentElement = document.getElementById('affaires-container') ||
+                          document.getElementById('app-content');
     contentElement.innerHTML = `
         <div class="fr-grid-row fr-grid-row--center">
             <div class="fr-col-12">
@@ -122,107 +128,19 @@ function escapeHtml(str) {
 }
 
 /**
- * Ouvre une modale DSFR
- * @param {string} title - Titre de la modale
- * @param {string} content - Contenu HTML de la modale
- * @param {string} modalId - ID de la modale
+ * Retourne la classe DSFR pour un badge en fonction de l'état
+ * @param {string} status - État de l'affaire
+ * @returns {string} - Classe DSFR
  */
-function openModal(title, content, modalId = 'app-modal') {
-    // Fermeture des modales existantes
-    closeModal();
+function getBadgeClass(status) {
+    if (!status) return "fr-badge--info";
 
-    // Création de la modale
-    const modal = document.createElement('div');
-    modal.id = modalId;
-    modal.className = 'fr-modal';
-    modal.setAttribute('aria-labelledby', `${modalId}-title`);
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
+    const classes = {
+        "pré-enregistrée": "fr-badge--info",
+        "en instruction": "fr-badge--warning",
+        "clôturée": "fr-badge--success",
+        "annulée": "fr-badge--error"
+    };
 
-    modal.innerHTML = `
-        <div class="fr-container">
-            <div class="fr-modal__body">
-                <div class="fr-modal__header">
-                    <h1 id="${modalId}-title" class="fr-modal__title">
-                        ${title}
-                    </h1>
-                </div>
-                <div class="fr-modal__content">
-                    ${content}
-                </div>
-                <div class="fr-modal__footer">
-                    <ul class="fr-btns-group fr-btns-group--right">
-                        <li>
-                            <button class="fr-btn fr-btn--secondary" onclick="closeModal('${modalId}')">
-                                Fermer
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-
-    // Initialisation du composant modal DSFR
-    if (window.dsfr) {
-        window.dsfr(modal).modal().init();
-    }
-}
-
-/**
- * Ferme une modale
- * @param {string} modalId - ID de la modale à fermer
- */
-function closeModal(modalId = 'app-modal') {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.remove();
-        document.body.style.overflow = '';
-    }
-}
-
-// Fonctions temporaires pour les autres pages
-function loadMembersPage() {
-    const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = `
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12">
-                <div class="fr-callout fr-callout--info">
-                    <h3 class="fr-callout__title">Page Membres</h3>
-                    <p class="fr-callout__text">Cette page sera implémentée prochainement.</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function loadHearingsPage() {
-    const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = `
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12">
-                <div class="fr-callout fr-callout--info">
-                    <h3 class="fr-callout__title">Page Audiences</h3>
-                    <p class="fr-callout__text">Cette page sera implémentée prochainement.</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function loadTemplatesPage() {
-    const contentElement = document.getElementById('app-content');
-    contentElement.innerHTML = `
-        <div class="fr-grid-row fr-grid-row--center">
-            <div class="fr-col-12">
-                <div class="fr-callout fr-callout--info">
-                    <h3 class="fr-callout__title">Page Modèles</h3>
-                    <p class="fr-callout__text">Cette page sera implémentée prochainement.</p>
-                </div>
-            </div>
-        </div>
-    `;
+    return classes[status.toLowerCase()] || "fr-badge--info";
 }
