@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enquête — Visualisation</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="title-block">
+    <h1 id="surveyTitle">Enquête — résultats</h1>
+    <p id="sourceBadge" class="badge">…</p>
+  </div>
+  <div class="actions">
+    <button id="csvBtn" type="button" title="Données filtrées au format CSV (Excel)">Export CSV</button>
+    <button id="pngBtn" type="button" title="Tous les graphiques en PNG (zip)">Export PNG</button>
+    <button id="printBtn" type="button" title="Imprimer / PDF via le navigateur">Imprimer</button>
+    <label class="file-label" title="Charger vos propres données depuis un CSV">Importer CSV
+      <input id="csvInput" type="file" accept=".csv,text/csv" hidden>
+    </label>
+    <button id="demoBtn" type="button" class="ghost" title="Recharger le jeu de démonstration">Démo</button>
+  </div>
+</header>
+
+<section id="statusLine" class="status" hidden></section>
+
+<section class="filters" aria-label="Filtres">
+  <div class="filters-head">
+    <h2>Filtres</h2>
+    <span id="filterCount" class="muted"></span>
+    <button id="resetFiltersBtn" type="button" class="ghost">Réinitialiser</button>
+  </div>
+  <div id="filterRow" class="filter-row"></div>
+</section>
+
+<nav class="tabs" id="tabBar" aria-label="Onglets">
+  <button type="button" data-tab="synthese" aria-selected="true">Synthèse</button>
+  <button type="button" data-tab="questions" aria-selected="false">Questions</button>
+  <button type="button" data-tab="croisement" aria-selected="false">Croisement</button>
+  <button type="button" data-tab="verbatim" aria-selected="false">Verbatim</button>
+</nav>
+
+<section class="tabpanel" id="panel-synthese" aria-label="Synthèse">
+  <div class="kpis" id="kpiRow" aria-label="Indicateurs clés"></div>
+  <div id="synthBox"></div>
+</section>
+
+<section class="tabpanel" id="panel-questions" aria-label="Questions" hidden>
+  <div class="q-layout">
+    <aside class="q-nav" id="qNav" aria-label="Sommaire des questions"></aside>
+    <div class="q-main">
+      <div class="q-pager">
+        <button id="qPrevBtn" type="button">← Précédente</button>
+        <span id="qCounter" class="muted"></span>
+        <button id="qNextBtn" type="button">Suivante →</button>
+      </div>
+      <div id="cards" class="cards single"></div>
+    </div>
+  </div>
+</section>
+
+<section class="tabpanel" id="panel-croisement" aria-label="Croisement" hidden>
+  <div class="filters" id="crossSection">
+    <div class="filters-head">
+      <h2>Croisement</h2>
+      <span id="crossNote" class="muted"></span>
+    </div>
+    <div class="filter-row">
+      <div class="filter">
+        <label for="crossX">Regrouper par</label>
+        <select id="crossX"></select>
+      </div>
+      <div class="filter">
+        <label for="crossY">Analyser</label>
+        <select id="crossY"></select>
+      </div>
+      <div class="filter">
+        <label for="crossMode">Affichage</label>
+        <select id="crossMode">
+          <option value="rowpct">% en ligne</option>
+          <option value="count">Effectifs</option>
+        </select>
+      </div>
+      <div class="filter filter-btns">
+        <label>&nbsp;</label>
+        <span>
+          <button id="crossCsvBtn" type="button">CSV</button>
+          <button id="crossPngBtn" type="button">PNG</button>
+        </span>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="crossCanvas" style="height:280px"></canvas></div>
+    <div id="crossTable"></div>
+    <p id="crossStat" class="muted"></p>
+  </div>
+</section>
+
+<section class="tabpanel" id="panel-verbatim" aria-label="Verbatim" hidden>
+  <div class="filters">
+    <div class="filters-head">
+      <h2>Réponses libres</h2>
+      <span id="verbCount" class="muted"></span>
+    </div>
+    <div class="filter-row">
+      <div class="filter">
+        <label for="verbSel">Question</label>
+        <select id="verbSel"></select>
+      </div>
+      <div class="filter filter-search">
+        <label for="verbSearch">Rechercher</label>
+        <input id="verbSearch" type="search" placeholder="Filtrer les messages…">
+      </div>
+      <div class="filter filter-btns">
+        <label>&nbsp;</label>
+        <span><button id="verbCsvBtn" type="button">CSV</button></span>
+      </div>
+    </div>
+    <div class="chips" id="verbChips"></div>
+    <div class="verbatim"><ul id="verbList"></ul></div>
+  </div>
+</section>
+
+<footer class="foot muted">
+  <span id="footNote"></span>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>
