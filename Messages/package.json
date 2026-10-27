@@ -1,11 +1,11 @@
 {
     "name": "@varamil/widget-messages",
     "description": "Simple messages widget for Grist.",
-    "homePage": "https://github.com/Varamil/grist-widget",
-    "version": "0.4.0",
+    "homePage": "https://github.com/aplds/grist-widgets",
+    "version": "0.5.0",
     "grist": {
       "name": "Messages Widget",
-      "url": "https://varamil.github.io/grist-widget/Messages/index.html",
+      "url": "https://aplds.github.io/grist-widgets/Messages/index.html",
       "widgetId": "@gristlabs/widget-messages",
       "published": true,
       "accessLevel": "full",

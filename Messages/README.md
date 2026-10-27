@@ -7,6 +7,7 @@ A widget to display a simple chat interface storing all messages in a row withou
 * Display messages in modern cards
 * Rich text support (via [Quill](https://github.com/slab/quill)), including images, tables and formulas
 * Include a form to post a new message
+* Edit or delete an existing message directly in the widget
 * Can display the sender name based Grist user name (*optional*)
 * Everything is stored as html in row, no additional table required
 * Localized (english, french and spanish)
@@ -21,7 +22,7 @@ A widget to display a simple chat interface storing all messages in a row withou
 ![image](images/user_config.png)
 
 4. Add a new view of type *Custom* to your page by choosing as source the table that will contain your messages.
-5. Select the *Custom URL* widget and paste the following URL into the field:  https://varamil.github.io/grist-widget/Messages/index.html then click on *Add a widget*
+5. Select the *Custom URL* widget and paste the following URL into the field:  https://aplds.github.io/grist-widgets/Messages/index.html then click on *Add a widget*
 6. In widget configuration (right pane), authorize widget access to your table 
 7. For *MESSAGES* option, select the column that will contain your messages
 8. *(Optional)* select for the *USER* option the column containing the author of the changes. It looks necessary, when this last configuration has been done, to reload the page to ensure all configurations are applied properly
@@ -41,6 +42,8 @@ Grist table with at least one column containing data for the messages.
 ## Author
 Varamil - [GitHub](https://github.com/Varamil)
 
+Fork adding message editing and deletion, maintained by [aplds](https://github.com/aplds).
+
 
 
 
@@ -52,6 +55,7 @@ Varamil - [GitHub](https://github.com/Varamil)
 * Afficher les messages dans une interface moderne
 * Supporte la mise en forme du texte (via [Quill](https://github.com/slab/quill)), incluant images, tableaux et formules
 * Inclue un formulaire pour ajouter un nouveau message
+* Modifier ou supprimer un message existant directement dans le widget
 * Peut afficher l'auteur basé sur le nom d'utilisateur Grist (*optionnel*)
 * Tout est stocké en html dans la ligne associée, aucune table supplémentaire de nécessaire
 * Multilingue (anglais, français and espagnol)
@@ -66,14 +70,14 @@ Varamil - [GitHub](https://github.com/Varamil)
 ![image](images/user_config.png)
 
 4. Ajouter une nouvelle vue de type *Personnalisée* à votre page en choisissant comme source la table qui contiendra vos messages
-5. Choisir le widget *URL personnalisé* et coller dans le champs l'URL suivante :  https://varamil.github.io/grist-widget/Messages/index.html puis cliquer sur *Ajouter un widget*
+5. Choisir le widget *URL personnalisée* et coller dans le champs l'URL suivante :  https://aplds.github.io/grist-widgets/Messages/index.html puis cliquer sur *Ajouter un widget*
 6. Dans la configuration du widget (volet de droite), autoriser l'accès du widget à votre table. 
 7. Sélectionnez pour l'option *MESSAGES* la colonne qui contiendra vos messages
-8. *(Optionnel)* sélectionnez pour l'option *USER* la colonne qui contient l'auteur des modifications. Il semble nécessaire, une fois cette dernière configuration faite, de devoir recharger la page pour s'assurer que toutes les configurations sont bien appliquées correctement
+8. *(Optionnel)* sélectionnez pour l'option *USER* la colonne qui contiendra l'auteur des modifications. Il semble nécessaire, une fois cette dernière configuration faite, de devoir recharger la page pour s'assurer que toutes les configurations sont bien appliquées correctement
 9. Ajouter un nouveau message mettra maintenant à jour la ligne sélectionnée dans le widget lié
 
 ## Configuration
-* *MESSAGES* : sélectionnez la colonne qui contiendra vos messages
+* *MESSAGES* : sélectionnez la colonne qui contiendra les messages
 * *USER* : *(optionnel)* vous pouvez sélectionner une colonne dans la table source où lire le dernier auteur. Vous devez utiliser une colonne de mise à jour automatique avec `user.Name` comme formule d'initialisation et *Appliquer sur les modifications à* coché (optionnellement vous pouvez le restreindre à la colonne utilisée pour les messages). Il s'agit clairement d'une astuce car on ne peut pas accéder au nom de l'utilisateur avec l'API, donc lorsqu'un nouveau message est posté, la colonne Message est mise à jour, ce qui déclenche la colonne Utilisateur, puis cette valeur mise à jour est lue, et la colonne Message est finalement mise à jour avec toutes les informations (l'auteur, la date et le contenu). De manière simpe, vous pouvez utiliser le raccourci *Mis à jour par* ([doc](https://support.getgrist.com/fr/authorship/#une-colonne-mis-a-jour-par))
 
 ![image](images/user_config.png)
@@ -85,3 +89,5 @@ Une table Grist avec au moins une colonne contenant des données pour les messag
 
 ## Auteur
 Varamil - [GitHub](https://github.com/Varamil)
+
+Fork ajoutant la modification et la suppression des messages, maintenu par [aplds](https://github.com/aplds).

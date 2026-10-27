@@ -64,6 +64,34 @@ body {
     float: right;
   }
   
+  .msg-actions {
+    float: right;
+    margin-right: 10px;
+  }
+
+  .msg-actions .msg-btn {
+    background: none;
+    border: none;
+    color: var(--background-element);
+    font-size: 12px;
+    padding: 0 4px;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+
+  .msg-actions .msg-btn:hover {
+    opacity: 1;
+  }
+
+  .msg-actions .msg-btn-danger {
+    font-weight: bold;
+  }
+
+  .card.editing {
+    outline: 3px solid #FF9800;
+  }
+
   .new-message {
     display: flex;
   }
@@ -105,6 +133,31 @@ body {
     background-color:#009058; 
   }
 
+  .composer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .composer-buttons .add-msg {
+    margin-top: 0;
+  }
+
+  .cancel-btn {
+    align-self: flex-end;
+    background: none;
+    border: 1px solid #16B378;
+    color: #16B378;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .cancel-btn:hover {
+    background-color: rgba(22, 179, 120, 0.15);
+  }
+
   .card-message {
     color: var(--text-color);
   }
@@ -129,7 +182,7 @@ body {
     display: flex;
     flex-direction: column;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif,
-      Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+      Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol;
     overflow: hidden;
   }
   
