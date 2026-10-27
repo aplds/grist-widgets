@@ -42,6 +42,10 @@ body {
     padding: 10px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px 8px;
   }
   
   .card-content {
@@ -61,12 +65,13 @@ body {
   }
   
   .date {
-    float: right;
+    margin-left: auto;
   }
   
   .msg-actions {
-    float: right;
-    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .msg-actions .msg-btn {
