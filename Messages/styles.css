@@ -75,14 +75,14 @@ body {
   }
 
   .msg-actions .msg-btn {
-    background: none;
+    background-color: white;
     border: none;
-    color: var(--background-element);
+    color: black;
     font-size: 12px;
-    padding: 0 4px;
+    padding: 2px 10px;
     cursor: pointer;
-    text-decoration: underline;
-    opacity: 0.8;
+    border-radius: 999px;
+    opacity: 0.9;
   }
 
   .msg-actions .msg-btn:hover {
@@ -90,7 +90,13 @@ body {
   }
 
   .msg-actions .msg-btn-danger {
+    background-color: #D32F2F;
+    color: white;
     font-weight: bold;
+  }
+
+  .msg-actions .msg-btn-danger:hover {
+    background-color: #B71C1C;
   }
 
   .card.editing {
