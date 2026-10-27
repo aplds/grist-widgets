@@ -43,7 +43,10 @@
       <div class="card-content">
           <div class="new-message">
               <div id="editor" class="editor-container"></div>
-              <button id="send" class="add-msg" onclick="AddNewMessage()">Send</button>
+              <div class="composer-buttons">
+                <button id="send" class="add-msg" onclick="AddNewMessage()">Send</button>
+                <button id="cancel-edit" class="cancel-btn" onclick="CancelEdit()" style="display: none">Cancel</button>
+              </div>
           </div>
         </div>    
     </div>
