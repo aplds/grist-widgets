@@ -8,8 +8,9 @@ Widget Grist générique de prise de rendez-vous, déployé sur GitHub Pages :
 1. **Une plage, point.** Le widget affiche uniquement les dates qui ont des
    ouvertures dans la table dédiée (ex. du 23 au 25/11), sans navigation
    mensuelle : proposer une plage, c'est l'organisateur qui le fait, dans Grist.
-2. **Chaque jour montre ses tranches** : libres (vert), occupées (rouge),
-   candidatures en attente (jaune). Granularité réglable (`step`, 30 min
+2. **Vue emploi du temps** : les jours de la plage en colonnes, les heures
+   en lignes ; chaque créneau est un bloc — libre (vert), occupé (rouge),
+   candidature en attente (jaune). Granularité réglable (`step`, 30 min
    par défaut).
 3. **L'utilisateur sélectionne une tranche et pose sa candidature** : nom,
    courriel, motif. La ligne est écrite dans la table des réservations avec

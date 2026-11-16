@@ -1,4 +1,4 @@
-/* Widget Grist — rendez-vous : une plage proposée, occupé / libre, une candidature. */
+/* Widget Grist — rendez-vous : plage proposée en vue emploi du temps. */
 :root {
   --bg: #f7f8fa; --card: #fff; --ink: #1f2933; --muted: #616e7c; --line: #e3e7eb;
   --accent: #2f6fed; --free: #e8f3ee; --free-ink: #0b7a54;
@@ -16,29 +16,41 @@ body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, 
   background: #fff8e6; border: 1px solid #f2d477; color: #7a5b00; font-size: 13px; }
 .status.err { background: var(--busy); border-color: #f0b7ae; color: var(--busy-ink); }
 
-.days { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; }
-.day-card { background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 10px 14px; }
-.day-card.full { opacity: .8; }
-.day-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-.day-head h2 { margin: 0; font-size: 15px; text-transform: capitalize; }
-.day-head .hint { color: var(--muted); font-size: 12px; }
-.slot-strip { display: flex; flex-wrap: wrap; gap: 6px; }
-.slot { border: 1px solid #bfe3d2; background: var(--free); color: var(--free-ink);
-  border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
-.slot:hover { outline: 2px solid var(--free-ink); }
-.slot.sel { outline: 2px solid var(--free-ink); outline-offset: 1px; font-weight: 600; }
-.slot.taken { border-color: #f0b7ae; background: var(--busy); color: var(--busy-ink); cursor: default; }
-.slot.wait { border-color: #e8c66a; background: var(--pending); color: var(--pending-ink); cursor: default; }
-.empty-day { color: var(--muted); font-size: 13px; }
-.legend { display: flex; gap: 12px; padding: 0 16px 8px; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
+#wrap { padding: 12px 16px; }
+.timetable { background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: auto; max-height: 70vh; }
+.tt-grid { display: grid; min-width: 100%; }
+.tt-corner { position: sticky; left: 0; background: var(--card); z-index: 3;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.tt-head { position: sticky; top: 0; background: var(--card); z-index: 2;
+  padding: 6px 4px; text-align: center; border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line); }
+.tt-head .dow { font-weight: 600; font-size: 12px; text-transform: capitalize; }
+.tt-head .dnum { font-size: 11px; color: var(--muted); }
+.tt-hh { position: sticky; left: 0; background: var(--card); z-index: 1;
+  font-size: 11px; color: var(--muted); text-align: right; padding-right: 6px;
+  border-right: 1px solid var(--line); width: 46px; }
+.tt-day { position: relative; border-right: 1px solid var(--line); }
+.tt-hour { position: absolute; left: 0; right: 0;
+  border-top: 1px dashed var(--line); pointer-events: none; }
+.blk { position: absolute; left: 3px; right: 3px; border-radius: 6px;
+  font-size: 11px; padding: 1px 5px; overflow: hidden; border: 1px solid transparent;
+  display: flex; align-items: center; }
+.blk.free { background: var(--free); color: var(--free-ink); border-color: #bfe3d2; cursor: pointer; }
+.blk.free:hover, .blk.free.sel { outline: 2px solid var(--free-ink); font-weight: 600; }
+.blk.busy { background: var(--busy); color: var(--busy-ink); border-color: #f0b7ae; }
+.blk.wait { background: var(--pending); color: var(--pending-ink); border-color: #e8c66a; }
+.blk.off { background: var(--closed); border-color: transparent; }
+.no-days { color: var(--muted); padding: 24px 16px; text-align: center; }
+
+.legend { display: flex; gap: 12px; margin: 8px 0 0; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
 .legend .key { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 .legend .free i { background: var(--free); border: 1px solid #bfe3d2; }
 .legend .busy i { background: var(--busy); border: 1px solid #f0b7ae; }
 .legend .wait i { background: var(--pending); border: 1px solid #e8c66a; }
 
-.book { margin: 4px 16px 16px; background: var(--card); border: 1px solid var(--line);
+.book { margin: 12px 16px 16px; background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 14px 16px; }
 .book label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0; }
 .book input { display: block; width: 100%; margin-top: 3px; font: inherit; padding: 6px 8px;
@@ -51,4 +63,3 @@ body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, 
 .book menu button { font: inherit; border: none; background: var(--accent); color: #fff;
   font-weight: 600; border-radius: 8px; padding: 7px 12px; cursor: pointer; }
 .book menu .ghost { background: none; color: var(--muted); }
-.no-days { color: var(--muted); padding: 24px 16px; text-align: center; }

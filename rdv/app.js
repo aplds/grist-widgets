@@ -183,10 +183,11 @@ function displayRange() {
   return { min: min, max: max };
 }
 
-/* ---------- rendu ---------- */
+/* ---------- rendu : emploi du temps ---------- */
+var PXH = 44; /* pixels par heure */
 function render() {
   document.getElementById('mainTitle').textContent = S.opts.title || DEFAULT_OPTS.title;
-  var el = document.getElementById('days');
+  var el = document.getElementById('timetable');
   el.innerHTML = '';
   var range = displayRange();
   if (!range) {
@@ -196,67 +197,87 @@ function render() {
   }
   document.getElementById('rangeLabel').textContent =
     'Du ' + fmtDay(range.min) + ' au ' + fmtDay(range.max);
-  var oldLegend = document.querySelector('.legend');
-  if (oldLegend) oldLegend.remove();
-  var legend = document.createElement('p');
-  legend.className = 'legend';
-  legend.innerHTML = '<span class="key free"><i></i>Libre</span>' +
-    '<span class="key busy"><i></i>Occupé</span>' +
-    '<span class="key wait"><i></i>Candidature en attente</span>';
-  el.parentNode.insertBefore(legend, el);
 
+  /* jours à afficher + bornes horaires globales */
+  var days = [], tMin = Infinity, tMax = -Infinity;
   var today = new Date();
+  var past0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   for (var d = new Date(range.min); d <= range.max; d = addDays(d, 1)) {
-    var dIso = iso(d);
-    var slices = daySlices(dIso);
-    var past = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    if (!slices.length) continue;
-    var card = document.createElement('section');
-    card.className = 'day-card';
-    var head = document.createElement('div'); head.className = 'day-head';
-    var h2 = document.createElement('h2'); h2.textContent = fmtDay(d);
-    head.appendChild(h2);
-    var strip = document.createElement('div'); strip.className = 'slot-strip';
-    if (past) {
-      card.classList.add('full');
-      var hint = document.createElement('span'); hint.className = 'hint';
-      hint.textContent = 'passé'; head.appendChild(hint);
-      var p = document.createElement('span'); p.className = 'empty-day';
-      p.textContent = '—'; strip.appendChild(p);
-    } else {
-      var anyFree = false;
-      slices.forEach(function (sl) {
-        var s = document.createElement('button');
-        s.type = 'button';
-        var wait = !sl.free && isPending(dIso, sl.start, sl.end);
-        s.className = 'slot' + (sl.free ? '' : (wait ? ' wait' : ' taken'));
-        s.textContent = hhmm(sl.start);
-        if (sl.free) {
-          anyFree = true;
-          s.title = 'Sélectionner ' + hhmm(sl.start) + ' → ' + hhmm(sl.end);
-          (function (dd, slice, btn) {
-            btn.addEventListener('click', function () {
-              selectSlot(dd, slice, btn);
-            });
-          })(dIso, sl, s);
-        } else {
-          s.disabled = true;
-          s.title = wait ? 'Candidature en attente' : 'Occupé';
-        }
-        strip.appendChild(s);
-      });
-      if (!anyFree) {
-        card.classList.add('full');
-        var full = document.createElement('span'); full.className = 'hint';
-        full.textContent = 'complet'; head.appendChild(full);
-      }
-    }
-    card.appendChild(head); card.appendChild(strip);
-    el.appendChild(card);
+    var ops = dayOpen(iso(d));
+    if (!ops.length) continue;
+    days.push(d);
+    ops.forEach(function (op) {
+      tMin = Math.min(tMin, op.start); tMax = Math.max(tMax, op.end);
+    });
   }
-  if (!el.children.length) {
+  if (!days.length) {
     el.innerHTML = '<p class="no-days">Aucun créneau disponible dans la plage proposée.</p>';
+    return;
   }
+  tMin = Math.floor(tMin / 60) * 60;
+  tMax = Math.ceil(tMax / 60) * 60;
+  var px = function (min) { return ((min - tMin) / 60) * PXH; };
+
+  /* grille : colonne heures + une colonne par jour */
+  var grid = document.createElement('div');
+  grid.className = 'tt-grid';
+  grid.style.gridTemplateColumns = '46px repeat(' + days.length + ', minmax(92px, 1fr))';
+  grid.style.height = px(tMax) + 'px';
+
+  var corner = document.createElement('div'); corner.className = 'tt-corner';
+  grid.appendChild(corner);
+  days.forEach(function (d) {
+    var head = document.createElement('div'); head.className = 'tt-head';
+    var dow = document.createElement('div'); dow.className = 'dow';
+    dow.textContent = DOW_FR[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_FR[d.getMonth()];
+    head.appendChild(dow);
+    grid.appendChild(head);
+  });
+
+  for (var h = tMin; h <= tMax; h += 60) {
+    var hh = document.createElement('div'); hh.className = 'tt-hh';
+    hh.style.height = PXH + 'px';
+    hh.textContent = h === tMax ? '' : pad(h / 60) + ':00';
+    grid.appendChild(hh);
+    days.forEach(function () { grid.appendChild(document.createElement('div')); });
+  }
+
+  /* blocs par jour */
+  days.forEach(function (d) {
+    var col = document.createElement('div'); col.className = 'tt-day';
+    for (var hl = tMin + 60; hl < tMax; hl += 60) {
+      var hr = document.createElement('div'); hr.className = 'tt-hour';
+      hr.style.top = px(hl) + 'px';
+      col.appendChild(hr);
+    }
+    var dIso = iso(d);
+    var past = d < past0;
+    dayOpen(dIso).forEach(function (op) {
+      var step = +S.opts.step || 30;
+      for (var t = op.start; t < op.end; t += step) {
+        var e = Math.min(t + step, op.end);
+        var blk = document.createElement('div');
+        blk.className = 'blk';
+        var free = !taken(dIso, t, e) && !past;
+        var wait = !free && isPending(dIso, t, e);
+        blk.classList.add(past && !taken(dIso, t, e) ? 'off' : (free ? 'free' : (wait ? 'wait' : 'busy')));
+        blk.style.top = 'calc(' + px(t) + 'px + 2px)';
+        blk.style.height = 'calc(' + (px(e) - px(t) - 3) + 'px)';
+        if (px(e) - px(t) >= PXH / 2) blk.textContent = hhmm(t);
+        if (free) {
+          blk.title = 'Sélectionner ' + hhmm(t) + ' → ' + hhmm(e);
+          (function (dd, slice, node) {
+            node.addEventListener('click', function () { selectSlot(dd, slice, node); });
+          })(dIso, { start: t, end: e }, blk);
+        } else {
+          blk.title = past ? 'Passé' : (wait ? 'Candidature en attente' : 'Occupé');
+        }
+        col.appendChild(blk);
+      }
+    });
+    grid.appendChild(col);
+  });
+  el.appendChild(grid);
 }
 
 /* ---------- sélection et candidature ---------- */

@@ -15,7 +15,14 @@
 
 <section id="statusLine" class="status" hidden></section>
 
-<main id="days" class="days" aria-label="Jours proposés"></main>
+<main id="wrap">
+  <div id="timetable" class="timetable" aria-label="Semainier des créneaux"></div>
+  <p class="legend">
+    <span class="key free"><i></i>Libre</span>
+    <span class="key busy"><i></i>Occupé</span>
+    <span class="key wait"><i></i>Candidature en attente</span>
+  </p>
+</main>
 
 <form id="bookForm" class="book" hidden>
   <p id="slotLine" class="slot-line"></p>
