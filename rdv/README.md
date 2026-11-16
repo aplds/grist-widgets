@@ -3,37 +3,34 @@
 Widget Grist générique de prise de rendez-vous, déployé sur GitHub Pages :
 <https://aplds.github.io/grist-widgets/rdv/>
 
-## Principe
+## Principes
 
-- **Vue agenda** : mois (résumé de disponibilité par jour), semaine (créneaux
-  libres) et journée (timeline détaillée).
-- **Créneaux calculés** : la table des **ouvertures** définit les plages
-  (date, début, fin, pas, capacité) ; la table des **réservations** soustrait
-  les créneaux occupés. Les durées proposées sont libres (15, 30, 45, 60 min…).
-- **Universel** : aucune marque ni logique métier codée en dur. Titres, tables,
-  colonnes et durées se règlent dans la configuration (bouton ⚙, persistée dans
-  les options du widget). Les colonnes sont détectées automatiquement (alias
-  FR/EN usuels : date/jour, début/fin, durée, nom, courriel/email, tel,
-  motif/objet, notes…).
-- **Écritures fiables** : l'accès complet du widget inscrit les réservations
-  via l'API Grist, avec re-vérification anti-conflit immédiatement avant
-  l'écriture.
-- **Horizon** : délai de réservation réglable (J+X jours).
-- **Mode démo** : ouvert directement sur GitHub Pages (hors Grist), le widget
-  montre un jeu de données fictif.
+1. **Un calendrier, point.** L'utilisateur voit, mois par mois, ce qui est
+   occupé, partiellement libre, ou fermé.
+2. **Clic sur un jour libre** : les tranches horaires s'affichent (libres en
+   vert, occupées en rouge, candidatures en attente en jaune).
+3. **Il sélectionne une tranche et pose sa candidature** : nom, courriel,
+   motif. La ligne est écrite dans la table des réservations avec le statut
+   *En attente* — c'est l'organisateur qui confirme dans Grist.
 
 ## Tables attendues (noms par défaut, configurables)
 
-| Ouvertures | Réservations |
-| --- | --- |
-| Date, Début, Fin, Pas (min), Capacité, Fermé si… | Date, Heure, Durée (min), annulée si… |
+- **Ouvertures** : Date, Début, Fin (+ colonne facultative Fermé/Statut).
+- **Reservations** : Date, Début, Fin ou Durée, Nom, Courriel, Motif,
+  Statut (la candidature écrit « En attente » ; « Annulé » est ignoré).
+
+Les colonnes sont détectées automatiquement (alias FR/EN usuels), la
+granularité des tranches et l'horizon de réservation se règlent dans les
+options du widget (`step`, `horizonDays`, `title`, `openTable`,
+`bookTable`).
 
 ## Installation dans Grist
 
 1. Ajouter un *Custom URL widget* pointant vers l'URL GitHub Pages ci-dessus.
-2. Accorder l'accès complet (*Full access*) pour permettre les écritures.
-3. Ouvrir la configuration (⚙) : indiquer les noms des tables, les durées
-   proposées, l'horizon, et au besoin les correspondances de colonnes.
+2. Accorder l'accès complet (*Full access*) pour permettre l'écriture.
+3. Créer les deux tables ; tout le reste est automatique.
+
+Hors Grist, la page ouverte directement montre un jeu de démonstration.
 
 ## Licence
 

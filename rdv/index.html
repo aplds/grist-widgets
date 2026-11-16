@@ -3,101 +3,52 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rendez-vous — Agenda</title>
+<title>Rendez-vous</title>
 <link rel="stylesheet" href="./styles.css">
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 </head>
 <body>
 <header class="topbar">
-  <div class="title-block">
-    <h1 id="mainTitle">Prise de rendez-vous</h1>
-    <p id="subTitle" class="badge">…</p>
-  </div>
-  <div class="actions">
-    <button id="prevBtn" type="button" title="Période précédente">←</button>
-    <button id="todayBtn" type="button">Aujourd'hui</button>
-    <button id="nextBtn" type="button" title="Période suivante">→</button>
-    <button id="refreshBtn" type="button" class="ghost" title="Recharger les données">⟳</button>
-    <button id="cfgBtn" type="button" class="ghost" title="Configurer le widget">⚙</button>
+  <h1 id="mainTitle">Rendez-vous</h1>
+  <div class="nav">
+    <button id="prevBtn" type="button" title="Mois précédent">←</button>
+    <span id="monthLabel"></span>
+    <button id="nextBtn" type="button" title="Mois suivant">→</button>
   </div>
 </header>
 
 <section id="statusLine" class="status" hidden></section>
 
-<nav class="tabs" id="tabBar" aria-label="Vue">
-  <button type="button" data-view="month" aria-selected="true">Mois</button>
-  <button type="button" data-view="week" aria-selected="false">Semaine</button>
-  <button type="button" data-view="day" aria-selected="false">Journée</button>
-</nav>
+<div id="monthGrid" class="month-grid" aria-label="Calendrier"></div>
 
-<section id="agenda" class="agenda">
-  <div id="monthGrid" class="month-grid" aria-label="Vue mois"></div>
-  <div id="weekGrid" class="week-grid" aria-label="Vue semaine" hidden></div>
-  <div id="dayGrid" class="day-grid" aria-label="Vue journée" hidden></div>
-</section>
-
-<aside id="legend" class="legend">
+<p class="legend">
   <span class="key free"><i></i>Libre</span>
-  <span class="key busy"><i></i>Réservé</span>
+  <span class="key busy"><i></i>Occupé</span>
+  <span class="key pending"><i></i>En attente</span>
   <span class="key closed"><i></i>Fermé</span>
-</aside>
+</p>
 
-<!-- Panneau de configuration -->
-<dialog id="cfgDialog">
-  <form method="dialog" class="cfg">
-    <h2>Configuration</h2>
-    <fieldset>
-      <legend>Général</legend>
-      <label>Titre <input id="cfgTitle" type="text"></label>
-      <label>Sous-titre <input id="cfgSubtitle" type="text"></label>
-      <label>Table des ouvertures <input id="cfgOpenTable" type="text" placeholder="Ouvertures"></label>
-      <label>Table des réservations <input id="cfgBookTable" type="text" placeholder="Reservations"></label>
-      <label>Durées proposées (minutes, séparées par des virgules)
-        <input id="cfgDurations" type="text" placeholder="15, 30, 45, 60"></label>
-      <label>Horizon de réservation (jours) <input id="cfgHorizon" type="number" min="1" max="365"></label>
-    </fieldset>
-    <fieldset>
-      <legend>Correspondance des colonnes (facultatif — auto si vide)</legend>
-      <p class="hint">Laisser vide pour la détection automatique (alias FR/EN usuels).</p>
-      <div class="map-grid">
-        <label>Ouvertures · date<input id="cfgODate" type="text" placeholder="auto"></label>
-        <label>Ouvertures · début<input id="cfgOStart" type="text" placeholder="auto"></label>
-        <label>Ouvertures · fin<input id="cfgOEnd" type="text" placeholder="auto"></label>
-        <label>Ouvertures · pas (min)<input id="cfgOStep" type="text" placeholder="auto"></label>
-        <label>Ouvertures · capacité<input id="cfgOCap" type="text" placeholder="auto"></label>
-        <label>Ouvertures · fermé si<input id="cfgOClosed" type="text" placeholder="ex : Fermé, Annulé"></label>
-        <label>Résa · date<input id="cfgBDate" type="text" placeholder="auto"></label>
-        <label>Résa · heure<input id="cfgBTime" type="text" placeholder="auto"></label>
-        <label>Résa · durée (min)<input id="cfgBDur" type="text" placeholder="auto"></label>
-        <label>Résa · annulée si<input id="cfgBCancel" type="text" placeholder="ex : Annulé"></label>
-      </div>
-    </fieldset>
-    <menu>
-      <button value="cancel" type="submit" class="ghost">Annuler</button>
-      <button value="save" type="submit">Enregistrer</button>
-    </menu>
-  </form>
-</dialog>
+<!-- Panneau du jour -->
+<dialog id="dayDialog">
+  <div class="day-panel">
+    <div class="day-head">
+      <h2 id="dayTitle"></h2>
+      <button id="dayClose" type="button" class="ghost" title="Fermer">✕</button>
+    </div>
+    <div id="daySlots" class="slot-strip"></div>
 
-<!-- Boîte de réservation -->
-<dialog id="bookDialog">
-  <form id="bookForm" class="book">
-    <h2 id="bookTitle">Réserver un créneau</h2>
-    <p id="bookSlot" class="slot-line"></p>
-    <label>Durée
-      <select id="bookDuration"></select>
-    </label>
-    <label>Nom <input id="bookName" type="text" required></label>
-    <label>Courriel <input id="bookEmail" type="email" required></label>
-    <label>Téléphone <input id="bookPhone" type="tel"></label>
-    <label>Motif <input id="bookSubject" type="text"></label>
-    <label>Notes <textarea id="bookNotes" rows="2"></textarea></label>
-    <p id="bookError" class="error" hidden></p>
-    <menu>
-      <button type="button" id="bookCancel" class="ghost">Annuler</button>
-      <button type="submit">Confirmer la réservation</button>
-    </menu>
-  </form>
+    <form id="bookForm" class="book" hidden>
+      <p id="slotLine" class="slot-line"></p>
+      <label>Nom <input id="bookName" type="text" required></label>
+      <label>Courriel <input id="bookEmail" type="email" required></label>
+      <label>Motif <input id="bookSubject" type="text"></label>
+      <p id="bookError" class="error" hidden></p>
+      <menu>
+        <button type="button" id="bookCancel" class="ghost">Annuler</button>
+        <button type="submit">Demander ce créneau</button>
+      </menu>
+    </form>
+  </div>
 </dialog>
 
 <script src="./app.js"></script>
