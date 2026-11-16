@@ -10,46 +10,24 @@
 <body>
 <header class="topbar">
   <h1 id="mainTitle">Rendez-vous</h1>
-  <div class="nav">
-    <button id="prevBtn" type="button" title="Mois précédent">←</button>
-    <span id="monthLabel"></span>
-    <button id="nextBtn" type="button" title="Mois suivant">→</button>
-  </div>
+  <p id="rangeLabel" class="range"></p>
 </header>
 
 <section id="statusLine" class="status" hidden></section>
 
-<div id="monthGrid" class="month-grid" aria-label="Calendrier"></div>
+<main id="days" class="days" aria-label="Jours proposés"></main>
 
-<p class="legend">
-  <span class="key free"><i></i>Libre</span>
-  <span class="key busy"><i></i>Occupé</span>
-  <span class="key pending"><i></i>En attente</span>
-  <span class="key closed"><i></i>Fermé</span>
-</p>
-
-<!-- Panneau du jour -->
-<dialog id="dayDialog">
-  <div class="day-panel">
-    <div class="day-head">
-      <h2 id="dayTitle"></h2>
-      <button id="dayClose" type="button" class="ghost" title="Fermer">✕</button>
-    </div>
-    <div id="daySlots" class="slot-strip"></div>
-
-    <form id="bookForm" class="book" hidden>
-      <p id="slotLine" class="slot-line"></p>
-      <label>Nom <input id="bookName" type="text" required></label>
-      <label>Courriel <input id="bookEmail" type="email" required></label>
-      <label>Motif <input id="bookSubject" type="text"></label>
-      <p id="bookError" class="error" hidden></p>
-      <menu>
-        <button type="button" id="bookCancel" class="ghost">Annuler</button>
-        <button type="submit">Demander ce créneau</button>
-      </menu>
-    </form>
-  </div>
-</dialog>
+<form id="bookForm" class="book" hidden>
+  <p id="slotLine" class="slot-line"></p>
+  <label>Nom <input id="bookName" type="text" required></label>
+  <label>Courriel <input id="bookEmail" type="email" required></label>
+  <label>Motif <input id="bookSubject" type="text"></label>
+  <p id="bookError" class="error" hidden></p>
+  <menu>
+    <button type="button" id="bookCancel" class="ghost">Annuler</button>
+    <button type="submit">Demander ce créneau</button>
+  </menu>
+</form>
 
 <script src="./app.js"></script>
 </body>

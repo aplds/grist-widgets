@@ -5,32 +5,37 @@ Widget Grist générique de prise de rendez-vous, déployé sur GitHub Pages :
 
 ## Principes
 
-1. **Un calendrier, point.** L'utilisateur voit, mois par mois, ce qui est
-   occupé, partiellement libre, ou fermé.
-2. **Clic sur un jour libre** : les tranches horaires s'affichent (libres en
-   vert, occupées en rouge, candidatures en attente en jaune).
-3. **Il sélectionne une tranche et pose sa candidature** : nom, courriel,
-   motif. La ligne est écrite dans la table des réservations avec le statut
-   *En attente* — c'est l'organisateur qui confirme dans Grist.
+1. **Une plage, point.** Le widget affiche uniquement les dates qui ont des
+   ouvertures dans la table dédiée (ex. du 23 au 25/11), sans navigation
+   mensuelle : proposer une plage, c'est l'organisateur qui le fait, dans Grist.
+2. **Chaque jour montre ses tranches** : libres (vert), occupées (rouge),
+   candidatures en attente (jaune). Granularité réglable (`step`, 30 min
+   par défaut).
+3. **L'utilisateur sélectionne une tranche et pose sa candidature** : nom,
+   courriel, motif. La ligne est écrite dans la table des réservations avec
+   le statut *En attente* — l'organisateur confirme ou refuse dans Grist.
+   Une relecture anti-conflit a lieu juste avant l'écriture.
 
 ## Tables attendues (noms par défaut, configurables)
 
 - **Ouvertures** : Date, Début, Fin (+ colonne facultative Fermé/Statut).
+  Ce sont ces lignes qui déterminent la plage affichée.
 - **Reservations** : Date, Début, Fin ou Durée, Nom, Courriel, Motif,
   Statut (la candidature écrit « En attente » ; « Annulé » est ignoré).
 
-Les colonnes sont détectées automatiquement (alias FR/EN usuels), la
-granularité des tranches et l'horizon de réservation se règlent dans les
-options du widget (`step`, `horizonDays`, `title`, `openTable`,
-`bookTable`).
+Les colonnes sont détectées automatiquement (alias FR/EN usuels). Options du
+widget : `title`, `openTable`, `bookTable`, `step`, `startDate` /
+`endDate` (plage forcée, facultative), `horizonDays`.
 
 ## Installation dans Grist
 
 1. Ajouter un *Custom URL widget* pointant vers l'URL GitHub Pages ci-dessus.
 2. Accorder l'accès complet (*Full access*) pour permettre l'écriture.
-3. Créer les deux tables ; tout le reste est automatique.
+3. Créer les deux tables et saisir la plage proposée ; tout le reste est
+   automatique.
 
-Hors Grist, la page ouverte directement montre un jeu de démonstration.
+Hors Grist, la page ouverte directement montre un jeu de démonstration
+(23-25 du mois suivant).
 
 ## Licence
 
