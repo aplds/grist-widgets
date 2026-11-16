@@ -183,7 +183,7 @@ function displayRange() {
   return { min: min, max: max };
 }
 
-/* ---------- rendu : emploi du temps ---------- */
+/* ---------- rendu : emploi du temps (style calendrier Grist) ---------- */
 var PXH = 44; /* pixels par heure */
 function render() {
   document.getElementById('mainTitle').textContent = S.opts.title || DEFAULT_OPTS.title;
@@ -216,40 +216,41 @@ function render() {
   }
   tMin = Math.floor(tMin / 60) * 60;
   tMax = Math.ceil(tMax / 60) * 60;
+  var hours = (tMax - tMin) / 60;
   var px = function (min) { return ((min - tMin) / 60) * PXH; };
 
-  /* grille : colonne heures + une colonne par jour */
+  /* grille explicite : ligne 1 = en-têtes, lignes 2.. = heures */
   var grid = document.createElement('div');
   grid.className = 'tt-grid';
-  grid.style.gridTemplateColumns = '46px repeat(' + days.length + ', minmax(92px, 1fr))';
-  grid.style.height = px(tMax) + 'px';
+  grid.style.gridTemplateColumns = '56px repeat(' + days.length + ', minmax(110px, 1fr))';
+  grid.style.gridTemplateRows = '30px repeat(' + hours + ', ' + PXH + 'px)';
 
   var corner = document.createElement('div'); corner.className = 'tt-corner';
   grid.appendChild(corner);
-  days.forEach(function (d) {
+  days.forEach(function (d, i) {
     var head = document.createElement('div'); head.className = 'tt-head';
-    var dow = document.createElement('div'); dow.className = 'dow';
-    dow.textContent = DOW_FR[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_FR[d.getMonth()];
-    head.appendChild(dow);
+    head.style.gridColumn = (i + 2) + '';
+    head.style.gridRow = '1';
+    var dow = document.createElement('span'); dow.className = 'dow';
+    dow.textContent = DOW_FR[d.getDay()].charAt(0).toUpperCase() + DOW_FR[d.getDay()].slice(1);
+    var dnum = document.createElement('span'); dnum.className = 'dnum';
+    dnum.textContent = d.getDate() + ' ' + MONTHS_FR[d.getMonth()];
+    if (iso(d) === iso(today)) head.classList.add('today');
+    head.appendChild(dow); head.appendChild(dnum);
     grid.appendChild(head);
   });
-
-  for (var h = tMin; h <= tMax; h += 60) {
+  for (var h = 0; h < hours; h++) {
     var hh = document.createElement('div'); hh.className = 'tt-hh';
-    hh.style.height = PXH + 'px';
-    hh.textContent = h === tMax ? '' : pad(h / 60) + ':00';
+    hh.style.gridColumn = '1'; hh.style.gridRow = (h + 2) + '';
+    hh.textContent = pad((tMin / 60 + h) % 24) + ':00';
     grid.appendChild(hh);
-    days.forEach(function () { grid.appendChild(document.createElement('div')); });
   }
 
-  /* blocs par jour */
-  days.forEach(function (d) {
+  /* colonnes de jours : une par jour, fusionnant toutes les lignes horaires */
+  days.forEach(function (d, i) {
     var col = document.createElement('div'); col.className = 'tt-day';
-    for (var hl = tMin + 60; hl < tMax; hl += 60) {
-      var hr = document.createElement('div'); hr.className = 'tt-hour';
-      hr.style.top = px(hl) + 'px';
-      col.appendChild(hr);
-    }
+    col.style.gridColumn = (i + 2) + '';
+    col.style.gridRow = '2 / span ' + hours;
     var dIso = iso(d);
     var past = d < past0;
     dayOpen(dIso).forEach(function (op) {
@@ -261,8 +262,8 @@ function render() {
         var free = !taken(dIso, t, e) && !past;
         var wait = !free && isPending(dIso, t, e);
         blk.classList.add(past && !taken(dIso, t, e) ? 'off' : (free ? 'free' : (wait ? 'wait' : 'busy')));
-        blk.style.top = 'calc(' + px(t) + 'px + 2px)';
-        blk.style.height = 'calc(' + (px(e) - px(t) - 3) + 'px)';
+        blk.style.top = px(t) + 'px';
+        blk.style.height = (px(e) - px(t) - 3) + 'px';
         if (px(e) - px(t) >= PXH / 2) blk.textContent = hhmm(t);
         if (free) {
           blk.title = 'Sélectionner ' + hhmm(t) + ' → ' + hhmm(e);
