@@ -1,10 +1,12 @@
 /* Widget Grist — rendez-vous (générique, public universel).
- * Calendrier FullCalendar (même moteur que le widget Calendar de Grist) :
- * vue semaine, plage proposée en validRange, ouvertures en fond vert,
- * occupations en gris, candidatures en attente en ambre.
+ * Calendrier FullCalendar plein écran (même moteur que le widget Calendar
+ * de Grist) : vue semaine, plage proposée en validRange, ouvertures en
+ * fond vert, occupations en gris, candidatures en attente en ambre.
  * L'utilisateur sélectionne une zone libre à la souris et pose sa
- * CANDIDATURE : la ligne est écrite « En attente » ; l'organisateur
- * confirme dans Grist. Hors Grist : mode démonstration. Statique, sans build.
+ * CANDIDATURE (ligne écrite « En attente »).
+ * Panneau organisateur : liste des candidatures en attente, confirmation
+ * ou refus écrits directement dans Grist.
+ * Hors Grist : mode démonstration. Statique, sans étape de build.
  */
 (function () {
 'use strict';
@@ -20,7 +22,8 @@ var DEFAULT_OPTS = {
   step: 30,          /* granularité (min) des créneaux */
   startDate: '',     /* plage forcée (facultatif) : '' = plage des ouvertures */
   endDate: '',
-  horizonDays: 365   /* bornage maximal */
+  horizonDays: 365,  /* bornage maximal */
+  admin: true        /* bouton organisateur visible */
 };
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
@@ -72,7 +75,9 @@ var S = {
   inGrist: false, demo: false, cal: null,
   opts: JSON.parse(JSON.stringify(DEFAULT_OPTS)),
   openings: [], busy: [], pending: [],
-  sel: null /* { date, start, end } */
+  cols: {},              /* colonnes détectées de la table Reservations */
+  sel: null,             /* { date, start, end } */
+  adminOpen: false
 };
 var CANCEL_TERMS = ['annule', 'refuse', 'cancel'];
 var CONFIRM_TERMS = ['confirme', 'valide', 'accepte', 'reserve', 'ok'];
@@ -98,7 +103,10 @@ function demoData() {
   busy.push({ date: iso(base), start: 10 * 60, end: 11 * 60 });
   busy.push({ date: iso(base), start: 15 * 60, end: 17 * 60 });
   busy.push({ date: iso(addDays(base, 1)), start: 9 * 60, end: 9 * 60 + 45 });
-  pend.push({ date: iso(addDays(base, 2)), start: 14 * 60, end: 15 * 60 });
+  pend.push({ date: iso(base), start: 11 * 60, end: 12 * 60, name: 'Martin Dupont',
+    email: 'martin.dupont@example.fr', subject: 'Demande de subvention' });
+  pend.push({ date: iso(addDays(base, 2)), start: 14 * 60, end: 15 * 60, name: 'Claire Martin',
+    email: 'claire.martin@example.fr', subject: 'Convention d occupation' });
   return { ops: ops, busy: busy, pend: pend };
 }
 
@@ -114,6 +122,12 @@ async function loadGrist() {
   var bDate = pickCol(bCols, ['date', 'jour']), bStart = pickCol(bCols, ['debut', 'heure', 'start', 'time']),
       bEnd = pickCol(bCols, ['fin', 'end']), bDur = pickCol(bCols, ['duree', 'duration']),
       bStat = pickCol(bCols, ['statut', 'etat', 'status']);
+  S.cols = {
+    date: bDate, start: bStart, end: bEnd, dur: bDur, stat: bStat,
+    name: pickCol(bCols, ['nom', 'name']),
+    email: pickCol(bCols, ['email', 'courriel']),
+    subject: pickCol(bCols, ['motif', 'objet', 'sujet', 'subject'])
+  };
   if (!oDate || !oStart || !oEnd) throw new Error(
     'Table « ' + S.opts.openTable + ' » : colonnes date / début / fin introuvables.');
   if (!bDate || !bStart) throw new Error(
@@ -134,7 +148,11 @@ async function loadGrist() {
     var st = bStat ? norm(r[bStat]) : '';
     if (matches(st, CANCEL_TERMS)) return;
     var isPending = st ? (!matches(st, CONFIRM_TERMS) && matches(st, PENDING_TERMS)) : false;
-    (isPending ? S.pending : S.busy).push({ date: iso(d), start: s, end: e });
+    var entry = { date: iso(d), start: s, end: e, rid: r.id };
+    if (S.cols.name) entry.name = r[S.cols.name];
+    if (S.cols.email) entry.email = r[S.cols.email];
+    if (S.cols.subject) entry.subject = r[S.cols.subject];
+    (isPending ? S.pending : S.busy).push(entry);
   });
   if (!S.openings.length) throw new Error(
     'Aucune ouverture dans « ' + S.opts.openTable + ' » — renseigner la plage proposée.');
@@ -150,9 +168,6 @@ function taken(dateIso, s, e) {
   return S.busy.concat(S.pending).some(function (b) {
     return b.date === dateIso && overlaps(b.start, b.end, s, e);
   });
-}
-function isPending(dateIso, s, e) {
-  return S.pending.some(function (b) { return b.date === dateIso && overlaps(b.start, b.end, s, e); });
 }
 function withinOpening(dateIso, s, e) {
   return dayOpen(dateIso).some(function (op) { return s >= op.start && e <= op.end; });
@@ -187,7 +202,8 @@ function buildEvents() {
   S.pending.forEach(function (p) {
     var st = fullDate(p.date, p.start), en = fullDate(p.date, p.end);
     if (!st || !en) return;
-    evts.push({ start: st, end: en, title: 'En attente', className: 'pend' });
+    evts.push({ start: st, end: en,
+      title: p.name ? p.name + ' (en attente)' : 'En attente', className: 'pend' });
   });
   return evts;
 }
@@ -202,7 +218,6 @@ function timeBounds() {
 }
 function ensureCalendar(range, tb) {
   if (S.cal) { S.cal.destroy(); S.cal = null; }
-  document.getElementById('timetable') /* compat éventuelle */;
   var holder = document.getElementById('wrap');
   var old = document.getElementById('calendar');
   if (old) old.remove();
@@ -217,7 +232,7 @@ function ensureCalendar(range, tb) {
     initialView: 'timeGridWeek',
     initialDate: (range.min > now ? range.min : now),
     headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
-    height: 'auto',
+    height: '100%',
     expandRows: true,
     allDaySlot: false,
     slotDuration: slot,
@@ -228,7 +243,6 @@ function ensureCalendar(range, tb) {
     slotMaxTime: hhmm(Math.ceil(tb.tMax / 60) * 60),
     validRange: { start: range.min, end: addDays(range.max, 1) },
     selectable: true,
-    selectMirror: false,
     unselectAuto: false,
     editable: false,
     eventStartEditable: false,
@@ -253,17 +267,17 @@ function ensureCalendar(range, tb) {
 }
 function render() {
   document.getElementById('mainTitle').textContent = S.opts.title || DEFAULT_OPTS.title;
-  var el = document.getElementById('wrap');
   var range = displayRange();
+  var nod = document.getElementById('noDays');
   if (!range) {
     if (S.cal) { S.cal.destroy(); S.cal = null; }
-    el.insertAdjacentHTML('beforeend', '<p class="no-days" id="nod">Aucune plage proposée pour le moment.</p>');
+    nod.hidden = false;
     document.getElementById('rangeLabel').textContent = '';
     return;
   }
+  nod.hidden = true;
   document.getElementById('rangeLabel').textContent =
     'Du ' + fmtDay(range.min) + ' au ' + fmtDay(range.max);
-  var nod = document.getElementById('nod'); if (nod) nod.remove();
   ensureCalendar(range, timeBounds());
 }
 
@@ -280,7 +294,6 @@ function selectSlot(dateIso, startMin, endMin) {
   var d = fromIso(dateIso);
   var f = document.getElementById('bookForm');
   f.hidden = false;
-  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById('slotLine').textContent =
     fmtDay(d) + ', de ' + hhmm(startMin) + ' à ' + hhmm(endMin) + '.';
   document.getElementById('bookError').hidden = true;
@@ -292,30 +305,27 @@ async function submitCandidacy(ev) {
   var email = document.getElementById('bookEmail').value.trim();
   if (!name || !email || !S.sel) return;
   if (S.demo) {
-    S.pending.push({ date: S.sel.date, start: S.sel.start, end: S.sel.end });
+    S.pending.push({ date: S.sel.date, start: S.sel.start, end: S.sel.end,
+      name: name, email: email,
+      subject: document.getElementById('bookSubject').value.trim() });
     status('Démo : candidature simulée (' + name + ', ' + hhmm(S.sel.start) + ').');
-    clearSelection(); refresh(); return;
+    clearSelection(); renderAdmin(); refresh(); return;
   }
   try {
     await loadGrist(); /* relecture anti-conflit */
     if (taken(S.sel.date, S.sel.start, S.sel.end)) {
       throw new Error("Ce créneau vient d'être pris. Merci d'en choisir un autre.");
     }
-    var rows = await grist.docApi.getTable(S.opts.bookTable);
-    var cols = rows.length ? Object.keys(rows[0]) : [];
     var f = {};
-    var cD = pickCol(cols, ['date', 'jour']); if (cD) f[cD] = S.sel.date;
-    var cS = pickCol(cols, ['debut', 'heure', 'start', 'time']); if (cS) f[cS] = hhmm(S.sel.start);
-    var cE = pickCol(cols, ['fin', 'end']);
-    var cDur = pickCol(cols, ['duree', 'duration']);
-    if (cE) f[cE] = hhmm(S.sel.end);
-    else if (cDur) f[cDur] = S.sel.end - S.sel.start;
-    var cN = pickCol(cols, ['nom', 'name']); if (cN) f[cN] = name;
-    var cM = pickCol(cols, ['email', 'courriel']); if (cM) f[cM] = email;
-    var cO = pickCol(cols, ['motif', 'objet', 'sujet', 'subject']);
-    if (cO) f[cO] = document.getElementById('bookSubject').value.trim();
-    var cSt = pickCol(cols, ['statut', 'etat', 'status']);
-    if (cSt) f[cSt] = 'En attente';
+    var c = S.cols;
+    if (c.date) f[c.date] = S.sel.date;
+    if (c.start) f[c.start] = hhmm(S.sel.start);
+    if (c.end) f[c.end] = hhmm(S.sel.end);
+    else if (c.dur) f[c.dur] = S.sel.end - S.sel.start;
+    if (c.name) f[c.name] = name;
+    if (c.email) f[c.email] = email;
+    if (c.subject) f[c.subject] = document.getElementById('bookSubject').value.trim();
+    if (c.stat) f[c.stat] = 'En attente';
     await grist.addRecords(S.opts.bookTable, [{ fields: f, toc: false }]);
     status('Demande envoyée — vous serez confirmé par courriel.');
     clearSelection();
@@ -323,6 +333,80 @@ async function submitCandidacy(ev) {
   } catch (e) {
     var err = document.getElementById('bookError');
     err.hidden = false; err.textContent = e.message;
+  }
+}
+
+/* ---------- panneau organisateur ---------- */
+function toggleAdmin(force) {
+  S.adminOpen = force === undefined ? !S.adminOpen : !!force;
+  var panel = document.getElementById('adminPanel');
+  var btn = document.getElementById('adminToggle');
+  panel.hidden = !S.adminOpen;
+  btn.classList.toggle('on', S.adminOpen);
+  if (S.adminOpen) renderAdmin();
+}
+function renderAdmin() {
+  if (!S.adminOpen) return;
+  var list = document.getElementById('pendList');
+  list.innerHTML = '';
+  if (!S.pending.length) {
+    list.innerHTML = '<p class="empty">Aucune candidature en attente.</p>';
+    return;
+  }
+  S.pending.forEach(function (p, idx) {
+    var d = fromIso(p.date);
+    var item = document.createElement('div');
+    item.className = 'pend-item';
+    var who = document.createElement('p'); who.className = 'who';
+    who.textContent = p.name || 'Candidat';
+    var when = document.createElement('p'); when.className = 'when';
+    when.textContent = fmtDay(d) + ' · ' + hhmm(p.start) + ' → ' + hhmm(p.end);
+    item.appendChild(who); item.appendChild(when);
+    if (p.email) {
+      var mail = document.createElement('p'); mail.className = 'meta';
+      mail.textContent = p.email + (p.subject ? ' — ' + p.subject : '');
+      item.appendChild(mail);
+    } else if (p.subject) {
+      var sub = document.createElement('p'); sub.className = 'meta';
+      sub.textContent = p.subject; item.appendChild(sub);
+    }
+    var menu = document.createElement('menu');
+    var bOk = document.createElement('button'); bOk.type = 'button'; bOk.textContent = 'Confirmer';
+    var bNo = document.createElement('button'); bNo.type = 'button';
+    bNo.className = 'refuse'; bNo.textContent = 'Refuser';
+    bOk.addEventListener('click', function () { decidePending(idx, true); });
+    bNo.addEventListener('click', function () { decidePending(idx, false); });
+    menu.appendChild(bOk); menu.appendChild(bNo);
+    item.appendChild(menu);
+    list.appendChild(item);
+  });
+}
+async function decidePending(idx, confirmIt) {
+  var p = S.pending[idx];
+  if (!p) return;
+  var list = document.getElementById('pendList');
+  var items = list.querySelectorAll('.pend-item');
+  var item = items[idx];
+  if (item) item.innerHTML = '<p class="wait">Enregistrement…</p>';
+  if (S.demo) {
+    S.pending.splice(idx, 1);
+    if (confirmIt) S.busy.push(p);
+    status('Démo : candidature ' + (confirmIt ? 'confirmée' : 'refusée') + '.');
+    renderAdmin(); refresh(); return;
+  }
+  try {
+    await loadGrist();
+    var cur = S.pending.filter(function (x) { return x.rid === p.rid; })[0];
+    if (!cur) throw new Error('Cette candidature a déjà été traitée.');
+    var fields = {};
+    if (S.cols.stat) fields[S.cols.stat] = confirmIt ? 'Confirmé' : 'Refusé';
+    await grist.docApi.updateTable(S.opts.bookTable, [{ id: p.rid, fields: fields }]);
+    status('Candidature ' + (confirmIt ? 'confirmée' : 'refusée') +
+      (confirmIt ? ' — créneau marqué occupé.' : '.'));
+    await refresh(); renderAdmin();
+  } catch (e) {
+    status('Erreur : ' + e.message, true);
+    renderAdmin();
   }
 }
 
@@ -335,6 +419,7 @@ async function refresh() {
       status('Mode démonstration — données fictives.');
     }
     render();
+    renderAdmin();
   } catch (e) {
     status('Erreur : ' + e.message, true);
   }
@@ -346,6 +431,10 @@ function boot(inGrist, savedOpts) {
   if (savedOpts) Object.keys(DEFAULT_OPTS).forEach(function (k) {
     if (savedOpts[k] !== undefined) S.opts[k] = savedOpts[k];
   });
+  var btn = document.getElementById('adminToggle');
+  btn.hidden = S.opts.admin === false;
+  btn.addEventListener('click', function () { toggleAdmin(); });
+  document.getElementById('adminClose').addEventListener('click', function () { toggleAdmin(false); });
   document.getElementById('bookCancel').addEventListener('click', clearSelection);
   document.getElementById('bookForm').addEventListener('submit', submitCandidacy);
   refresh();

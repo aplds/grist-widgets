@@ -12,19 +12,25 @@
 </head>
 <body>
 <header class="topbar">
-  <h1 id="mainTitle">Rendez-vous</h1>
-  <p id="rangeLabel" class="range"></p>
+  <div class="tb-left">
+    <h1 id="mainTitle">Rendez-vous</h1>
+    <p id="rangeLabel" class="range"></p>
+  </div>
+  <div class="tb-right">
+    <p class="legend">
+      <span class="key free"><i></i>Libre</span>
+      <span class="key busy"><i></i>Occupé</span>
+      <span class="key wait"><i></i>En attente</span>
+    </p>
+    <button id="adminToggle" class="admin-btn" type="button" hidden>Organisateur</button>
+  </div>
 </header>
 
 <section id="statusLine" class="status" hidden></section>
 
 <main id="wrap">
   <div id="calendar"></div>
-  <p class="legend">
-    <span class="key free"><i></i>Libre — sélectionnable</span>
-    <span class="key busy"><i></i>Occupé</span>
-    <span class="key wait"><i></i>Candidature en attente</span>
-  </p>
+  <p id="noDays" class="no-days" hidden>Aucune plage proposée pour le moment.</p>
 </main>
 
 <form id="bookForm" class="book" hidden>
@@ -38,6 +44,14 @@
     <button type="submit">Demander ce créneau</button>
   </menu>
 </form>
+
+<aside id="adminPanel" class="admin" hidden>
+  <header>
+    <h2>Candidatures en attente</h2>
+    <button type="button" id="adminClose" class="ghost">×</button>
+  </header>
+  <div id="pendList"></div>
+</aside>
 
 <script src="./app.js"></script>
 </body>

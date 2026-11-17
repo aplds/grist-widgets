@@ -13,11 +13,18 @@ widget Calendar natif de Grist).
 - Ouvertures : bandes vert clair (fond, sélectionnable).
 - Réservations confirmées : événements gris « Occupé ».
 - Candidatures « En attente » : événements ambre.
+- Le widget occupe toute la page (hauteur 100 % du conteneur Grist).
 - L'utilisateur sélectionne à la souris une zone libre (dans une ouverture,
   hors créneau pris, pas dans le passé, granularité = option step) : le
-  formulaire de candidature s'affiche ; la ligne est écrite dans la table
-  Reservations avec le statut « En attente ». L'organisateur confirme ou
-  refuse dans Grist. Une relecture anti-conflit a lieu juste avant l'écriture.
+  formulaire de candidature s'affiche en carte flottante ; la ligne est écrite
+  dans la table Reservations avec le statut « En attente ». Une relecture
+  anti-conflit a lieu juste avant l'écriture.
+- Panneau organisateur (bouton « Organisateur » en haut à droite) : liste des
+  candidatures en attente (nom, courriel, motif, créneau) avec boutons
+  Confirmer / Refuser. La décision met à jour la colonne Statut dans Grist
+  (« Confirmé » → créneau occupé ; « Refusé » → créneau libéré). Masquable
+  via l'option admin = false. Le contrôle d'accès relève du partage du
+  document Grist, pas du widget.
 
 ## Installation dans Grist
 
