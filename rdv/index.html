@@ -6,6 +6,9 @@
 <title>Rendez-vous</title>
 <link rel="stylesheet" href="./styles.css">
 <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/fr.global.min.js"></script>
 </head>
 <body>
 <header class="topbar">
@@ -16,10 +19,9 @@
 <section id="statusLine" class="status" hidden></section>
 
 <main id="wrap">
-  <p class="hint-line">Cliquez sur un créneau <b>vert</b> pour demander un rendez-vous.</p>
-  <div id="timetable" class="timetable" aria-label="Créneaux de la plage proposée"></div>
+  <div id="calendar"></div>
   <p class="legend">
-    <span class="key free"><i></i>Libre</span>
+    <span class="key free"><i></i>Libre — sélectionnable</span>
     <span class="key busy"><i></i>Occupé</span>
     <span class="key wait"><i></i>Candidature en attente</span>
   </p>

@@ -1,10 +1,10 @@
-/* Widget Grist — rendez-vous (générique, volontairement minimal).
- * Affiche la plage de dates qui a des ouvertures dans Grist (ou la plage
- * forcée dans les options). Chaque jour montre ses tranches : occupées en
- * rouge, candidatures en attente en jaune, libres en vert. L'utilisateur
- * sélectionne une tranche libre et pose sa CANDIDATURE : la ligne est
- * écrite « En attente » ; l'organisateur confirme dans Grist.
- * Hors Grist : mode démonstration. Statique, sans étape de build.
+/* Widget Grist — rendez-vous (générique, public universel).
+ * Calendrier FullCalendar (même moteur que le widget Calendar de Grist) :
+ * vue semaine, plage proposée en validRange, ouvertures en fond vert,
+ * occupations en gris, candidatures en attente en ambre.
+ * L'utilisateur sélectionne une zone libre à la souris et pose sa
+ * CANDIDATURE : la ligne est écrite « En attente » ; l'organisateur
+ * confirme dans Grist. Hors Grist : mode démonstration. Statique, sans build.
  */
 (function () {
 'use strict';
@@ -17,7 +17,7 @@ var DEFAULT_OPTS = {
   title: 'Rendez-vous',
   openTable: 'Ouvertures',
   bookTable: 'Reservations',
-  step: 30,          /* granularité (min) des tranches */
+  step: 30,          /* granularité (min) des créneaux */
   startDate: '',     /* plage forcée (facultatif) : '' = plage des ouvertures */
   endDate: '',
   horizonDays: 365   /* bornage maximal */
@@ -34,6 +34,13 @@ function fromIso(s) {
   }
   return null;
 }
+function fullDate(dateIso, min) {
+  var d = fromIso(dateIso);
+  if (!d) return null;
+  d.setHours(Math.floor(min / 60), min % 60, 0, 0);
+  return d;
+}
+function minutesOfDate(d) { return d.getHours() * 60 + d.getMinutes(); }
 function minutesOf(v) {
   if (typeof v === 'number') return v > 8 ? v : v * 60;
   if (typeof v !== 'string') return null;
@@ -62,7 +69,7 @@ function matches(v, terms) {
 
 /* ---------- état ---------- */
 var S = {
-  inGrist: false, demo: false,
+  inGrist: false, demo: false, cal: null,
   opts: JSON.parse(JSON.stringify(DEFAULT_OPTS)),
   openings: [], busy: [], pending: [],
   sel: null /* { date, start, end } */
@@ -133,20 +140,7 @@ async function loadGrist() {
     'Aucune ouverture dans « ' + S.opts.openTable + ' » — renseigner la plage proposée.');
 }
 
-async function refresh() {
-  try {
-    if (S.inGrist) { await loadGrist(); status(null); }
-    else {
-      var d = demoData(); S.openings = d.ops; S.busy = d.busy; S.pending = d.pend;
-      status('Mode démonstration — données fictives.');
-    }
-    render();
-  } catch (e) {
-    status('Erreur : ' + e.message, true);
-  }
-}
-
-/* ---------- tranches ---------- */
+/* ---------- tranches / conflits ---------- */
 function dayOpen(dateIso) {
   return S.openings.filter(function (o) { return o.date === dateIso && !o.closed; })
     .sort(function (a, b) { return a.start - b.start; });
@@ -160,15 +154,8 @@ function taken(dateIso, s, e) {
 function isPending(dateIso, s, e) {
   return S.pending.some(function (b) { return b.date === dateIso && overlaps(b.start, b.end, s, e); });
 }
-function daySlices(dateIso) {
-  var step = +S.opts.step || 30, out = [];
-  dayOpen(dateIso).forEach(function (op) {
-    for (var t = op.start; t < op.end; t += step) {
-      var e = Math.min(t + step, op.end);
-      out.push({ start: t, end: e, free: !taken(dateIso, t, e) });
-    }
-  });
-  return out;
+function withinOpening(dateIso, s, e) {
+  return dayOpen(dateIso).some(function (op) { return s >= op.start && e <= op.end; });
 }
 
 /* ---------- plage affichée ---------- */
@@ -183,122 +170,119 @@ function displayRange() {
   return { min: min, max: max };
 }
 
-/* ---------- rendu : emploi du temps (style calendrier Grist) ---------- */
-var PXH = 44; /* pixels par heure */
+/* ---------- rendu FullCalendar ---------- */
+function buildEvents() {
+  var evts = [];
+  S.openings.forEach(function (o) {
+    if (o.closed) return;
+    var st = fullDate(o.date, o.start), en = fullDate(o.date, o.end);
+    if (!st || !en) return;
+    evts.push({ start: st, end: en, display: 'background' });
+  });
+  S.busy.forEach(function (b) {
+    var st = fullDate(b.date, b.start), en = fullDate(b.date, b.end);
+    if (!st || !en) return;
+    evts.push({ start: st, end: en, title: 'Occupé' });
+  });
+  S.pending.forEach(function (p) {
+    var st = fullDate(p.date, p.start), en = fullDate(p.date, p.end);
+    if (!st || !en) return;
+    evts.push({ start: st, end: en, title: 'En attente', className: 'pend' });
+  });
+  return evts;
+}
+function timeBounds() {
+  var tMin = Infinity, tMax = -Infinity;
+  S.openings.forEach(function (o) {
+    if (o.closed) return;
+    tMin = Math.min(tMin, o.start); tMax = Math.max(tMax, o.end);
+  });
+  if (tMin === Infinity) { tMin = 8 * 60; tMax = 18 * 60; }
+  return { tMin: tMin, tMax: tMax };
+}
+function ensureCalendar(range, tb) {
+  if (S.cal) { S.cal.destroy(); S.cal = null; }
+  document.getElementById('timetable') /* compat éventuelle */;
+  var holder = document.getElementById('wrap');
+  var old = document.getElementById('calendar');
+  if (old) old.remove();
+  var cal = document.createElement('div');
+  cal.id = 'calendar';
+  holder.insertBefore(cal, holder.firstChild);
+  var step = +S.opts.step || 30;
+  var slot = '00:' + pad(step) + ':00';
+  var now = new Date();
+  S.cal = new FullCalendar.Calendar(cal, {
+    locale: 'fr',
+    initialView: 'timeGridWeek',
+    initialDate: (range.min > now ? range.min : now),
+    headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
+    height: 'auto',
+    expandRows: true,
+    allDaySlot: false,
+    slotDuration: slot,
+    snapDuration: slot,
+    slotLabelInterval: '01:00:00',
+    scrollTime: hhmm(tb.tMin),
+    slotMinTime: hhmm(Math.floor(tb.tMin / 60) * 60),
+    slotMaxTime: hhmm(Math.ceil(tb.tMax / 60) * 60),
+    validRange: { start: range.min, end: addDays(range.max, 1) },
+    selectable: true,
+    selectMirror: false,
+    unselectAuto: false,
+    editable: false,
+    eventStartEditable: false,
+    eventDurationEditable: false,
+    dayMaxEvents: true,
+    events: buildEvents(),
+    selectAllow: function (info) {
+      if (iso(info.start) !== iso(info.end)) return false;   /* un seul jour */
+      var dIso = iso(info.start);
+      var s = minutesOfDate(info.start), e = minutesOfDate(info.end);
+      if (e <= s) return false;
+      var today = new Date();
+      var today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      if (info.start < today0) return false;                  /* pas de passé */
+      return withinOpening(dIso, s, e) && !taken(dIso, s, e);
+    },
+    select: function (info) {
+      selectSlot(iso(info.start), minutesOfDate(info.start), minutesOfDate(info.end));
+    }
+  });
+  S.cal.render();
+}
 function render() {
   document.getElementById('mainTitle').textContent = S.opts.title || DEFAULT_OPTS.title;
-  var el = document.getElementById('timetable');
-  el.innerHTML = '';
+  var el = document.getElementById('wrap');
   var range = displayRange();
   if (!range) {
-    el.innerHTML = '<p class="no-days">Aucune plage proposée pour le moment.</p>';
+    if (S.cal) { S.cal.destroy(); S.cal = null; }
+    el.insertAdjacentHTML('beforeend', '<p class="no-days" id="nod">Aucune plage proposée pour le moment.</p>');
     document.getElementById('rangeLabel').textContent = '';
     return;
   }
   document.getElementById('rangeLabel').textContent =
     'Du ' + fmtDay(range.min) + ' au ' + fmtDay(range.max);
-
-  /* jours à afficher + bornes horaires globales */
-  var days = [], tMin = Infinity, tMax = -Infinity;
-  var today = new Date();
-  var past0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  for (var d = new Date(range.min); d <= range.max; d = addDays(d, 1)) {
-    var ops = dayOpen(iso(d));
-    if (!ops.length) continue;
-    days.push(d);
-    ops.forEach(function (op) {
-      tMin = Math.min(tMin, op.start); tMax = Math.max(tMax, op.end);
-    });
-  }
-  if (!days.length) {
-    el.innerHTML = '<p class="no-days">Aucun créneau disponible dans la plage proposée.</p>';
-    return;
-  }
-  tMin = Math.floor(tMin / 60) * 60;
-  tMax = Math.ceil(tMax / 60) * 60;
-  var hours = (tMax - tMin) / 60;
-  var px = function (min) { return ((min - tMin) / 60) * PXH; };
-
-  /* grille explicite : ligne 1 = en-têtes, lignes 2.. = heures */
-  var grid = document.createElement('div');
-  grid.className = 'tt-grid';
-  grid.style.gridTemplateColumns = '56px repeat(' + days.length + ', minmax(110px, 1fr))';
-  grid.style.gridTemplateRows = '30px repeat(' + hours + ', ' + PXH + 'px)';
-
-  var corner = document.createElement('div'); corner.className = 'tt-corner';
-  grid.appendChild(corner);
-  days.forEach(function (d, i) {
-    var head = document.createElement('div'); head.className = 'tt-head';
-    head.style.gridColumn = (i + 2) + '';
-    head.style.gridRow = '1';
-    var dow = document.createElement('span'); dow.className = 'dow';
-    dow.textContent = DOW_FR[d.getDay()].charAt(0).toUpperCase() + DOW_FR[d.getDay()].slice(1);
-    var dnum = document.createElement('span'); dnum.className = 'dnum';
-    dnum.textContent = d.getDate() + ' ' + MONTHS_FR[d.getMonth()];
-    if (iso(d) === iso(today)) head.classList.add('today');
-    head.appendChild(dow); head.appendChild(dnum);
-    grid.appendChild(head);
-  });
-  for (var h = 0; h < hours; h++) {
-    var hh = document.createElement('div'); hh.className = 'tt-hh';
-    hh.style.gridColumn = '1'; hh.style.gridRow = (h + 2) + '';
-    hh.textContent = pad((tMin / 60 + h) % 24) + ':00';
-    grid.appendChild(hh);
-  }
-
-  /* colonnes de jours : une par jour, fusionnant toutes les lignes horaires */
-  days.forEach(function (d, i) {
-    var col = document.createElement('div'); col.className = 'tt-day';
-    col.style.gridColumn = (i + 2) + '';
-    col.style.gridRow = '2 / span ' + hours;
-    var dIso = iso(d);
-    var past = d < past0;
-    dayOpen(dIso).forEach(function (op) {
-      var step = +S.opts.step || 30;
-      for (var t = op.start; t < op.end; t += step) {
-        var e = Math.min(t + step, op.end);
-        var blk = document.createElement('div');
-        blk.className = 'blk';
-        var free = !taken(dIso, t, e) && !past;
-        var wait = !free && isPending(dIso, t, e);
-        blk.classList.add(past && !taken(dIso, t, e) ? 'off' : (free ? 'free' : (wait ? 'wait' : 'busy')));
-        blk.style.top = px(t) + 'px';
-        blk.style.height = (px(e) - px(t) - 3) + 'px';
-        if (px(e) - px(t) >= PXH / 2) blk.textContent = hhmm(t);
-        if (free) {
-          blk.title = 'Sélectionner ' + hhmm(t) + ' → ' + hhmm(e);
-          (function (dd, slice, node) {
-            node.addEventListener('click', function () { selectSlot(dd, slice, node); });
-          })(dIso, { start: t, end: e }, blk);
-        } else {
-          blk.title = past ? 'Passé' : (wait ? 'Candidature en attente' : 'Occupé');
-        }
-        col.appendChild(blk);
-      }
-    });
-    grid.appendChild(col);
-  });
-  el.appendChild(grid);
+  var nod = document.getElementById('nod'); if (nod) nod.remove();
+  ensureCalendar(range, timeBounds());
 }
 
 /* ---------- sélection et candidature ---------- */
 function clearSelection() {
   S.sel = null;
-  document.querySelectorAll('.slot.sel').forEach(function (b) { b.classList.remove('sel'); });
+  if (S.cal) S.cal.unselect();
   var f = document.getElementById('bookForm');
   f.hidden = true; f.reset();
   document.getElementById('bookError').hidden = true;
 }
-function selectSlot(dateIso, slice, btn) {
-  S.sel = { date: dateIso, start: slice.start, end: slice.end };
-  document.querySelectorAll('.slot.sel').forEach(function (b) { b.classList.remove('sel'); });
-  btn.classList.add('sel');
+function selectSlot(dateIso, startMin, endMin) {
+  S.sel = { date: dateIso, start: startMin, end: endMin };
   var d = fromIso(dateIso);
   var f = document.getElementById('bookForm');
   f.hidden = false;
   f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById('slotLine').textContent =
-    fmtDay(d) + ', de ' + hhmm(slice.start) + ' à ' + hhmm(slice.end) + '.';
+    fmtDay(d) + ', de ' + hhmm(startMin) + ' à ' + hhmm(endMin) + '.';
   document.getElementById('bookError').hidden = true;
 }
 
@@ -310,7 +294,7 @@ async function submitCandidacy(ev) {
   if (S.demo) {
     S.pending.push({ date: S.sel.date, start: S.sel.start, end: S.sel.end });
     status('Démo : candidature simulée (' + name + ', ' + hhmm(S.sel.start) + ').');
-    clearSelection(); render(); return;
+    clearSelection(); refresh(); return;
   }
   try {
     await loadGrist(); /* relecture anti-conflit */
@@ -339,6 +323,20 @@ async function submitCandidacy(ev) {
   } catch (e) {
     var err = document.getElementById('bookError');
     err.hidden = false; err.textContent = e.message;
+  }
+}
+
+/* ---------- rafraîchissement ---------- */
+async function refresh() {
+  try {
+    if (S.inGrist) { await loadGrist(); status(null); }
+    else {
+      var d = demoData(); S.openings = d.ops; S.busy = d.busy; S.pending = d.pend;
+      status('Mode démonstration — données fictives.');
+    }
+    render();
+  } catch (e) {
+    status('Erreur : ' + e.message, true);
   }
 }
 
